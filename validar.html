@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificación Oficial de Certificados - DEPJA</title>
+  
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="config.js"></script>
+  <style>
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body style="background-color: #f1f5f9; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-bottom: 3rem;">
+
+  <!-- Header Institucional de Validación -->
+  <header style="width: 100%; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); color: white; padding: 1.5rem; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    <h1 style="font-size: 1.25rem; font-weight: 700;">DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS</h1>
+    <p style="font-size: 0.875rem; color: #93c5fd; margin-top: 0.25rem;">Portal Oficial de Verificación de Autenticidad de Certificados — Convenio Seguridad Privada</p>
+  </header>
+
+  <main style="max-width: 750px; width: 92%; margin-top: 2rem;">
+    
+    <!-- Buscador Manual -->
+    <div style="background: #ffffff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; margin-bottom: 1.5rem;">
+      <h2 style="font-size: 1rem; color: #1e3a8a; margin-bottom: 0.75rem; font-weight: 600;">🔍 Consultar Certificado por Código o DNI</h2>
+      <form id="formSearchValidation" style="display: flex; gap: 0.75rem;">
+        <input type="text" id="searchQueryInput" class="form-control" placeholder="Ingrese el Código (ej: CERT-DEPJA-123456) o DNI..." required style="flex: 1;">
+        <button type="submit" class="btn btn-primary" style="white-space: nowrap;">
+          Verificar
+        </button>
+      </form>
+    </div>
+
+    <!-- Resultado de la Verificación -->
+    <div id="verificationResult">
+      <!-- Se llena dinámicamente mediante validator.js -->
+    </div>
+
+  </main>
+
+  <footer style="margin-top: 3rem; text-align: center; font-size: 0.8rem; color: #64748b;">
+    © DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS — Sistema de Verificación Digital
+  </footer>
+
+  <script src="js/drive-api.js"></script>
+  <script src="js/validator.js"></script>
+</body>
+</html>

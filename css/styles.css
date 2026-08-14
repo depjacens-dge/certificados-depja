@@ -1,0 +1,716 @@
+/* ==========================================================================
+   SISTEMA DE CERTIFICADOS DEPJA - CONVENIO SEGURIDAD PRIVADA (MENDOZA)
+   ESTILOS DE INTERFAZ Y HOJA OFICIAL FIEL AL DISEÑO INSTITUCIONAL DGE
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #0066b2;
+  --primary-hover: #004d88;
+  --banner-blue: #00a6e0;
+  --text-dark: #1e293b;
+  --bg-app: #f1f5f9;
+  --card-bg: #ffffff;
+  --border-color: #cbd5e1;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header de la Aplicación Web */
+.app-header {
+  background: linear-gradient(135deg, #0055a5 0%, #0f172a 100%);
+  color: #ffffff;
+  padding: 1.1rem 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-title-group h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.015em;
+  color: #f8fafc;
+}
+
+.app-title-group p {
+  font-size: 0.85rem;
+  color: #7dd3fc;
+  margin-top: 0.2rem;
+}
+
+.config-badge {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #e2e8f0;
+}
+
+.dot-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+}
+
+/* Layout Principal */
+.main-layout {
+  display: grid;
+  grid-template-columns: 440px 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1750px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+}
+
+@media (max-width: 1150px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Panel Formulario */
+.panel-form {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.3rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15);
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.options-grid {
+  display: flex;
+  gap: 1rem;
+  background: #f8fafc;
+  padding: 0.65rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.espacios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.espacio-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ef4444;
+  padding: 0.4rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background-color: #fee2e2;
+}
+
+.btn-add {
+  background-color: #f1f5f9;
+  color: var(--primary);
+  border: 1px dashed var(--primary);
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-add:hover {
+  background-color: #e0f2fe;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e2e8f0;
+}
+
+.btn {
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 102, 178, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-success {
+  background-color: #0f766e;
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  background-color: #0d9488;
+}
+
+.btn-outline {
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid var(--border-color);
+}
+
+.btn-outline:hover {
+  background-color: #f8fafc;
+}
+
+/* ==========================================================================
+   PLANTILLA DE CERTIFICADO FIEL AL DISEÑO ADJUNTO (HOJA A4)
+   ========================================================================== */
+
+.panel-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview-toolbar {
+  background: var(--card-bg);
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 210mm;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* LA HOJA A4 OFICIAL */
+.a4-sheet {
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  padding: 16mm 18mm 14mm 18mm;
+  background-color: #ffffff;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  box-sizing: border-box;
+  color: #000000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #d1d5db;
+  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}
+
+/* Encabezado Superior con Logo DGE */
+.cert-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.8rem;
+}
+
+.cert-header-dept {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #0055a5;
+  line-height: 1.25;
+  width: 65%;
+  text-transform: uppercase;
+}
+
+.cert-logo-dge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dge-brand {
+  font-size: 26pt;
+  font-weight: 900;
+  color: #0055a5;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.dge-text {
+  font-size: 7.5pt;
+  font-weight: 700;
+  color: #0055a5;
+  line-height: 1.1;
+  text-transform: uppercase;
+  border-left: 2px solid #0055a5;
+  padding-left: 0.4rem;
+}
+
+/* Título Principal */
+.cert-main-title {
+  text-align: center;
+  font-size: 14pt;
+  font-weight: 800;
+  color: #0055a5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.35rem;
+}
+
+.cert-main-subtitle {
+  text-align: center;
+  font-size: 9.5pt;
+  font-weight: 800;
+  color: #000000;
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+}
+
+/* Banners Celestes de Sección */
+.cert-banner-header {
+  background-color: #00a6e0;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 11pt;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 0.4rem 0.5rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 1.2rem;
+  border-radius: 1px;
+}
+
+/* Grilla de Datos del Estudiante */
+.cert-grid-student {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 1.1rem;
+  column-gap: 2rem;
+  font-size: 9.5pt;
+  margin-bottom: 1.2rem;
+}
+
+.cert-line-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-line-label {
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  color: #000000;
+}
+
+.cert-line-fill {
+  border-bottom: 1.5px solid #000000;
+  min-height: 1.3rem;
+  font-weight: 500;
+  font-size: 10pt;
+  padding-left: 0.2rem;
+  color: #000000;
+}
+
+/* Checkboxes debajo de Año */
+.cert-checkboxes-inline {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-top: 0.4rem;
+}
+
+.cert-checkbox-box {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 9.5pt;
+  font-weight: 700;
+}
+
+.box-sq {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #000000;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Secciones Opción Pedagógica y Espacios */
+.cert-pedagogica-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.cert-espacios-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cert-espacios-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-espacios-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-espacios-lines-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.cert-single-line {
+  border-bottom: 1.5px solid #000000;
+  min-height: 1.35rem;
+  font-size: 9.5pt;
+}
+
+/* Sección Firma y QR */
+.cert-bottom-signatures {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 2rem;
+  align-items: flex-end;
+  margin-top: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.signature-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.signature-image-box {
+  min-height: 70px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.signature-image-box img {
+  max-height: 65px;
+  max-width: 220px;
+  object-fit: contain;
+}
+
+.signature-text {
+  font-size: 9pt;
+  font-weight: 700;
+  color: #000000;
+}
+
+.issuance-date-text {
+  font-size: 9pt;
+  font-weight: 700;
+  margin-top: 0.8rem;
+  color: #000000;
+}
+
+.qr-container-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.qr-title {
+  font-size: 8pt;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  color: #000000;
+}
+
+.qr-canvas-holder {
+  width: 130px;
+  height: 130px;
+  background: #ffffff;
+  padding: 2px;
+}
+
+/* Footer Institucional Mendoza */
+.cert-footer-mendoza {
+  margin-top: auto;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.address-block {
+  font-style: italic;
+  font-size: 8.5pt;
+  color: #333333;
+  line-height: 1.3;
+}
+
+.footer-logos-mendoza {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mendoza-text {
+  font-size: 14pt;
+  font-weight: 900;
+  color: #0055a5;
+  letter-spacing: 1px;
+}
+
+/* Modal y Toast */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 850px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-app);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.table-history {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table-history th, .table-history td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.table-history th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+}
+
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 0.85rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  z-index: 2000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ==========================================================================
+   REGLAS DE IMPRESIÓN ESTRICTAS (A4 PAPER)
+   ========================================================================== */
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  body {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .app-header,
+  .panel-form,
+  .preview-toolbar,
+  .modal-overlay,
+  .toast {
+    display: none !important;
+  }
+
+  .main-layout {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .panel-preview {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .a4-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    padding: 14mm 16mm 12mm 16mm !important;
+    margin: 0 auto !important;
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+}

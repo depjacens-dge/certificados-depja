@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Certificados - Convenio Seguridad Privada (DEPJA Mendoza)</title>
+  
+  <!-- Estilos y Librería QR -->
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Configuración Centralizada -->
+  <script src="config.js"></script>
+</head>
+<body>
+
+  <!-- Header Superior de la Aplicación -->
+  <header class="app-header">
+    <div class="app-title-group">
+      <h1>DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS</h1>
+      <p>Sistema de Emisión de Certificados — Convenio Seguridad Privada (DGE Mendoza)</p>
+    </div>
+    <div class="config-badge" id="badgeEstado">
+      <span class="dot-status"></span>
+      <span id="txtEstadoConexion">Modo Listo / Nube (Vercel & Google Drive)</span>
+    </div>
+  </header>
+
+  <!-- Layout Principal de 2 Columnas -->
+  <main class="main-layout">
+    
+    <!-- COLUMNA IZQUIERDA: Formulario de Carga -->
+    <section class="panel-form">
+      <div class="section-title">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        Carga de Datos del Certificado
+      </div>
+
+      <form id="certForm">
+        
+        <!-- Nombre, DNI, Localidad -->
+        <div class="form-group">
+          <label for="inputNombre">Nombre y Apellido *</label>
+          <input type="text" id="inputNombre" class="form-control" required placeholder="Ej: PÉREZ, Juan Carlos">
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="inputDni">DNI *</label>
+            <input type="text" id="inputDni" class="form-control" required placeholder="Ej: 38.452.891">
+          </div>
+          <div class="form-group">
+            <label for="inputLocalidad">Localidad *</label>
+            <input type="text" id="inputLocalidad" class="form-control" required placeholder="Ej: Mendoza Capital">
+          </div>
+        </div>
+
+        <!-- Escuela de Origen, CUE, Año -->
+        <div class="form-group">
+          <label for="inputEscuela">Escuela de Origen *</label>
+          <input type="text" id="inputEscuela" class="form-control" required placeholder="Ej: C.E.N.S. Nº 3-415">
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="inputCue">CUE *</label>
+            <input type="text" id="inputCue" class="form-control" placeholder="Ej: 5000452-00">
+          </div>
+          <div class="form-group">
+            <label for="inputAno">Año *</label>
+            <input type="text" id="inputAno" class="form-control" placeholder="Ej: 2024">
+          </div>
+        </div>
+
+        <!-- Selector de Año de Cursado (1º, 2º, 3º) -->
+        <div class="form-group">
+          <label>Año de Cursado *</label>
+          <div class="options-grid">
+            <label class="option-item">
+              <input type="radio" name="anoCursado" value="1º"> 1º
+            </label>
+            <label class="option-item">
+              <input type="radio" name="anoCursado" value="2º" checked> 2º
+            </label>
+            <label class="option-item">
+              <input type="radio" name="anoCursado" value="3º"> 3º
+            </label>
+          </div>
+        </div>
+
+        <!-- Selector Opción Pedagógica -->
+        <div class="form-group">
+          <label>Opción Pedagógica *</label>
+          <div class="options-grid">
+            <label class="option-item">
+              <input type="radio" name="opcionPedagogica" value="Presencial" checked> Presencial
+            </label>
+            <label class="option-item">
+              <input type="radio" name="opcionPedagogica" value="Semipresencial"> Semipresencial
+            </label>
+            <label class="option-item">
+              <input type="radio" name="opcionPedagogica" value="A Distancia"> A Distancia
+            </label>
+          </div>
+        </div>
+
+        <!-- Espacios Acreditados -->
+        <div class="form-group">
+          <label>Espacios Acreditados</label>
+          <div id="espaciosInputsContainer" class="espacios-list">
+            <!-- Render dinámico -->
+          </div>
+          <button type="button" id="btnAddEspacio" class="btn-add">
+            + Agregar Espacio Acreditado
+          </button>
+        </div>
+
+        <!-- Fechas de Inscripción y Emisión -->
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="inputFechaInscripcion">Fecha de Inscripción *</label>
+            <input type="date" id="inputFechaInscripcion" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="inputFechaEmision">Fecha de Emisión *</label>
+            <input type="text" id="inputFechaEmision" class="form-control" placeholder="DD/MM/AAAA">
+          </div>
+        </div>
+
+        <!-- Firma Digital / Imagen de Firma Opcional -->
+        <div class="form-group">
+          <label for="inputFirmaImg">Imagen de Firma/Sello (Opcional)</label>
+          <input type="file" id="inputFirmaImg" accept="image/*" class="form-control">
+          <span style="font-size: 0.75rem; color: #64748b;">Puedes subir una firma digitalizada o dejar en blanco para firmado físico.</span>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="action-buttons">
+          <button type="button" id="btnImprimir" class="btn btn-primary">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-4 0h-4v-4h4v4z"></path></svg>
+            Imprimir / Descargar PDF (A4)
+          </button>
+
+          <button type="button" id="btnGuardarDrive" class="btn btn-success">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Guardar en Base de Datos (Google Drive)
+          </button>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <button type="button" id="btnVerHistorial" class="btn btn-outline">
+              📁 Historial
+            </button>
+            <button type="button" id="btnLimpiar" class="btn btn-outline">
+              🔄 Limpiar
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- COLUMNA DERECHA: Vista Previa Fiel al Diseño Adjunto (Hoja A4) -->
+    <section class="panel-preview">
+      
+      <div class="preview-toolbar">
+        <span style="font-size: 0.875rem; font-weight: 600; color: #475569;">
+          📄 Vista Previa Exacta del Certificado (Formato A4)
+        </span>
+        <a href="validar.html" target="_blank" style="font-size: 0.8rem; color: #0055a5; font-weight: 600; text-decoration: none;">
+          🔗 Ver Página Pública de Validación QR ↗
+        </a>
+      </div>
+
+      <!-- HOJA A4 OFICIAL CREADA EXACTA AL DISEÑO IMAGEN -->
+      <article class="a4-sheet" id="hojaCertificado">
+        
+        <!-- Header Superior con Logo DGE -->
+        <header class="cert-header-row">
+          <div class="cert-header-dept">
+            DIRECCIÓN DE EDUCACIÓN<br>PERMANENTE DE JÓVENES Y ADULTOS
+          </div>
+
+          <div class="cert-logo-dge">
+            <span class="dge-brand">DG<em style="font-style: italic; font-weight: 400; color: #eab308;">e</em></span>
+            <div class="dge-text">
+              DIRECCIÓN GENERAL<br>DE ESCUELAS
+            </div>
+          </div>
+        </header>
+
+        <!-- Título Principal & Subtítulo -->
+        <h1 class="cert-main-title">CERTIFICADO DE ESTUDIOS INCOMPLETOS SECUNDARIOS</h1>
+        <div class="cert-main-subtitle">CONVENIO SEGURIDAD PRIVADA - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS</div>
+
+        <!-- Banner 1: DATOS DEL ESTUDIANTE -->
+        <div class="cert-banner-header">DATOS DEL ESTUDIANTE</div>
+
+        <!-- Grilla de Campos -->
+        <div class="cert-grid-student">
+          <!-- Columna Izquierda -->
+          <div class="cert-line-group">
+            <span class="cert-line-label">Nombre y Apellido:</span>
+            <div class="cert-line-fill" id="viewNombre"></div>
+          </div>
+
+          <!-- Columna Derecha -->
+          <div class="cert-line-group">
+            <span class="cert-line-label">Localidad:</span>
+            <div class="cert-line-fill" id="viewLocalidad"></div>
+          </div>
+
+          <div class="cert-line-group">
+            <span class="cert-line-label">DNI:</span>
+            <div class="cert-line-fill" id="viewDni"></div>
+          </div>
+
+          <div class="cert-line-group">
+            <span class="cert-line-label">Año de Cursado:</span>
+            <div class="cert-line-fill" id="viewAnoCursadoTexto"></div>
+          </div>
+
+          <div class="cert-line-group">
+            <span class="cert-line-label">Escuela de Origen:</span>
+            <div class="cert-line-fill" id="viewEscuela"></div>
+          </div>
+
+          <div class="cert-line-group">
+            <span class="cert-line-label">Año:</span>
+            <div class="cert-line-fill" id="viewAno"></div>
+            
+            <!-- Checkboxes debajo de Año -->
+            <div class="cert-checkboxes-inline">
+              <span class="cert-checkbox-box"><span class="box-sq" id="box1er"></span> 1º</span>
+              <span class="cert-checkbox-box"><span class="box-sq" id="box2do"></span> 2º</span>
+              <span class="cert-checkbox-box"><span class="box-sq" id="box3er"></span> 3º</span>
+            </div>
+          </div>
+
+          <div class="cert-line-group" style="grid-column: span 2;">
+            <span class="cert-line-label">CUE:</span>
+            <div class="cert-line-fill" id="viewCue"></div>
+          </div>
+        </div>
+
+        <!-- Banner 2: OPCIÓN PEDAGÓGICA -->
+        <div class="cert-banner-header">OPCIÓN PEDAGÓGICA</div>
+
+        <div class="cert-pedagogica-row">
+          <span class="cert-checkbox-box" style="font-size: 10.5pt;"><span class="box-sq" id="boxPresencial"></span> Presencial</span>
+          <span class="cert-checkbox-box" style="font-size: 10.5pt;"><span class="box-sq" id="boxSemipresencial"></span> Semipresencial</span>
+          <span class="cert-checkbox-box" style="font-size: 10.5pt;"><span class="box-sq" id="boxDistancia"></span> A Distancia</span>
+        </div>
+
+        <!-- Espacios Acreditados y Fecha de Inscripción -->
+        <div class="cert-espacios-row">
+          <div class="cert-espacios-left">
+            <span class="cert-line-label" style="font-size: 10pt;">Espacios acreditados:</span>
+            <div class="cert-espacios-lines-list" id="viewEspaciosLines">
+              <!-- Materias renderizadas -->
+            </div>
+          </div>
+
+          <div class="cert-espacios-right">
+            <span class="cert-line-label" style="font-size: 10pt;">Fecha de Inscripción: <span id="viewFechaInscripcion">00/00/0000</span></span>
+            <div class="cert-single-line" style="margin-top: 0.8rem;"></div>
+          </div>
+        </div>
+
+        <!-- Sección Firma, Fecha Emisión y Código QR -->
+        <div class="cert-bottom-signatures">
+          <div class="signature-container">
+            <div class="signature-image-box" id="viewSignatureBox">
+              <div style="width: 220px; border-bottom: 1.5px solid #000000;"></div>
+            </div>
+            <div class="signature-text">Firma y sello de la autoridad escolar</div>
+            <div class="issuance-date-text">
+              El presente certificado tiene fecha de emisión el día <span id="viewFechaEmision">……./……../……….</span>
+            </div>
+          </div>
+
+          <!-- Código QR -->
+          <div class="qr-container-box">
+            <div class="qr-title">Código QR de Verificación</div>
+            <div id="qrCanvasContainer" class="qr-canvas-holder"></div>
+          </div>
+        </div>
+
+        <!-- Pie Institucional Mendoza DGE -->
+        <footer class="cert-footer-mendoza">
+          <div class="address-block">
+            <em>Patricias Mendocinas 970</em><br>
+            <em>-Mendoza Capital CP 5500</em><br>
+            <em>Tel. +54 02614299280</em><br><br>
+            <em>Depjasecretaria@mendoza.edu.ar</em>
+          </div>
+
+          <div class="footer-logos-mendoza">
+            <span class="dge-brand" style="font-size: 20pt; color: #0055a5;">DG<em style="font-style: italic; font-weight: 400; color: #eab308;">e</em></span>
+            <span style="font-size: 16pt; color: #cbd5e1; margin: 0 0.4rem;">|</span>
+            
+            <!-- Escudo Mendoza SVG -->
+            <svg width="28" height="34" viewBox="0 0 100 120" fill="none">
+              <ellipse cx="50" cy="55" rx="38" ry="48" fill="#ffffff" stroke="#0055a5" stroke-width="4"/>
+              <path d="M 12 55 Q 50 25 88 55 Q 50 85 12 55 Z" fill="#00a6e0"/>
+              <circle cx="50" cy="55" r="10" fill="#eab308"/>
+            </svg>
+
+            <span class="mendoza-text">MENDOZA</span>
+          </div>
+        </footer>
+
+      </article>
+    </section>
+
+  </main>
+
+  <!-- MODAL HISTORIAL -->
+  <div class="modal-overlay" id="modalHistorial">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; color: #0055a5;">📁 Historial de Certificados Emitidos</h3>
+        <button type="button" class="btn-icon" id="btnCloseModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <table class="table-history">
+          <thead>
+            <tr>
+              <th>Código Certificado</th>
+              <th>Estudiante</th>
+              <th>DNI</th>
+              <th>Fecha Emisión</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyHistorial">
+            <!-- Dinámico -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIÓN -->
+  <div class="toast" id="toastNotification">
+    <span class="toast-message">Notificación</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/drive-api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
