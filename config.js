@@ -5,12 +5,19 @@
  * la URL del servidor en la nube (Vercel/GitHub), o el enlace de Google Sheets/Drive.
  */
 
+// Detección automática del dominio base (funciona en Local y en GitHub Pages)
+const getAutoBaseUrl = () => {
+  const origin = window.location.origin;
+  const path = window.location.pathname.replace(/\/index\.html$/, '').replace(/\/validar\.html$/, '').replace(/\/$/, '');
+  return `${origin}${path}`;
+};
+
 const CONFIG = {
   // ==========================================
   // 1. DATOS DEL RESPONSABLE Y CONTACTO
   // ==========================================
   // Cambia este correo por el de la persona a la que le prestarás el servicio
-  correoResponsable: 'vitor.ejemplo@educacion.gob.ar', 
+  correoResponsable: 'admin.depja@educacion.gob.ar', 
   nombreInstitucion: 'DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS',
   subtituloConvenio: 'CONVENIO SEGURIDAD PRIVADA - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS',
 
@@ -22,11 +29,10 @@ const CONFIG = {
   googleAppsScriptUrl: '', 
 
   // ==========================================
-  // 3. DOMINIO WEB ALOJADO (VERCEL / GITHUB PAGES / SERVIDOR PROPIO)
+  // 3. DOMINIO WEB ALOJADO (GITHUB PAGES / VERCEL / SERVIDOR PROPIO)
   // ==========================================
-  // Cuando subas la app a Vercel o GitHub Pages, coloca aquí la URL pública
-  // Ejemplo: 'https://certificados-depja.vercel.app'
-  appBaseUrl: window.location.origin, 
+  // Se detecta automáticamente en GitHub Pages (ej: https://2008-tdh.github.io/certificados-depja)
+  appBaseUrl: getAutoBaseUrl(), 
 
   // ==========================================
   // 4. MODO DE FUNCIONAMIENTO
