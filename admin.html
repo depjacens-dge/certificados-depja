@@ -349,12 +349,12 @@
         return;
       }
 
-      cargarDatosPanel();
-
       btnLogout.addEventListener('click', () => {
         auth.cerrarSesion();
       });
-      });
+
+      // Cargar datos iniciales del panel
+      await cargarDatosPanel();
 
       // Navegación entre pestañas
       document.querySelectorAll('.admin-tab-btn').forEach(btn => {
@@ -459,11 +459,33 @@
         await renderMetricas();
       }
 
-      async function renderTablaEscuelas() {
+      const inputFiltroEscuelas = document.getElementById('filtroEscuelas');
+      if (inputFiltroEscuelas) {
+        inputFiltroEscuelas.addEventListener('input', (e) => {
+          renderTablaEscuelas(e.target.value);
+        });
+      }
+
+      async function renderTablaEscuelas(filtroTexto = '') {
         const escuelas = await auth.cargarEscuelas();
         tbodyEscuelas.innerHTML = '';
         
-        escuelas.forEach(esc => {
+        const q = (filtroTexto || '').toLowerCase().trim();
+        const filtradas = q 
+          ? escuelas.filter(e => 
+              (e.numero && e.numero.toLowerCase().includes(q)) || 
+              (e.nombre && e.nombre.toLowerCase().includes(q)) || 
+              (e.localidad && e.localidad.toLowerCase().includes(q)) ||
+              (e.cue && e.cue.toLowerCase().includes(q))
+            )
+          : escuelas;
+
+        if (filtradas.length === 0) {
+          tbodyEscuelas.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">No se encontraron escuelas con ese criterio de búsqueda.</td></tr>`;
+          return;
+        }
+
+        filtradas.forEach(esc => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${esc.numero}</strong></td>
