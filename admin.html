@@ -663,6 +663,11 @@
               cue = val;
             } else if (norm.includes('localidad') || norm.includes('ciudad') || norm.includes('departamento')) {
               localidad = val;
+            } else if (norm.includes('opcion') || norm.includes('modalidad')) {
+              if (val.toUpperCase().includes('TEM')) opcionPedagogica = 'TEM';
+              else if (val.toLowerCase().includes('semi')) opcionPedagogica = 'Semipresencial';
+              else if (val.toLowerCase().includes('distancia')) opcionPedagogica = 'A Distancia';
+              else opcionPedagogica = 'Presencial';
             } else if (norm.includes('materia') || norm.includes('espacio') || norm.includes('asignatura')) {
               if (val.includes(';') || val.includes(',')) {
                 espacios.push(...val.split(/[;,]/).map(s => s.trim()).filter(s => s.length > 0));

@@ -330,6 +330,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('boxPresencial').textContent = state.opcionPedagogica === 'Presencial' ? '✓' : '';
     document.getElementById('boxSemipresencial').textContent = state.opcionPedagogica === 'Semipresencial' ? '✓' : '';
     document.getElementById('boxDistancia').textContent = state.opcionPedagogica === 'A Distancia' ? '✓' : '';
+    const boxTemEl = document.getElementById('boxTem');
+    if (boxTemEl) {
+      boxTemEl.textContent = (state.opcionPedagogica && state.opcionPedagogica.toUpperCase() === 'TEM') ? '✓' : '';
+    }
 
     // Render Espacios Acreditados
     const containerEspacios = document.getElementById('viewEspaciosLines');

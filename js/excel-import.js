@@ -195,7 +195,8 @@ class ExcelImporter {
 
         // Opción Pedagógica
         else if (norm === 'opcionpedagogica' || norm === 'modalidad' || norm === 'opcion') {
-          if (val.toLowerCase().includes('semi')) opcionPedagogica = 'Semipresencial';
+          if (val.toUpperCase().includes('TEM')) opcionPedagogica = 'TEM';
+          else if (val.toLowerCase().includes('semi')) opcionPedagogica = 'Semipresencial';
           else if (val.toLowerCase().includes('distancia')) opcionPedagogica = 'A Distancia';
           else opcionPedagogica = 'Presencial';
         }
