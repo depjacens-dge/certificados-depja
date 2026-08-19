@@ -6,6 +6,7 @@
   <title>Panel de Administración y Gestión de Escuelas - DEPJA Mendoza</title>
   
   <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="config.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/drive-api.js"></script>
@@ -110,11 +111,14 @@
       <button type="button" class="admin-tab-btn active" data-tab="tab-escuelas">
         🏫 Escuelas / CENS
       </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-excel">
+        📊 Subir Planillas Excel (Alta Masiva)
+      </button>
       <button type="button" class="admin-tab-btn" data-tab="tab-usuarios">
         👥 Cuentas de Acceso (Roles)
       </button>
       <button type="button" class="admin-tab-btn" data-tab="tab-metricas">
-        📊 Métricas e Historial Global
+        📈 Métricas e Historial Global
       </button>
     </nav>
 
@@ -155,7 +159,66 @@
       </div>
     </section>
 
-    <!-- PESTAÑA 2: GESTIÓN DE USUARIOS Y ROLES -->
+    <!-- PESTAÑA 2: CARGA MASIVA DE ALUMNOS (EXCEL) -->
+    <section id="tab-excel" class="admin-tab-content" style="display: none;">
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 style="font-size: 1.2rem; color: #0055a5; font-weight: 700;">📥 Carga Masiva de Alumnos desde Planilla Excel</h2>
+            <p style="font-size: 0.85rem; color: #64748b;">Sube la nómina de alumnos (.xlsx, .xls o .csv) para darles de alta automáticamente en la base de datos.</p>
+          </div>
+          <button type="button" id="btnAdminDescargarPlantilla" class="btn btn-outline" style="color: #0369a1; border-color: #38bdf8;">
+            📥 Descargar Planilla Modelo (.xlsx)
+          </button>
+        </div>
+
+        <!-- Zona Drag & Drop -->
+        <div class="excel-drop-zone" id="adminExcelDropZone" onclick="document.getElementById('adminExcelFileInput').click();" style="margin-bottom: 1.25rem;">
+          <input type="file" id="adminExcelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
+          <svg class="excel-drop-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          <div class="excel-drop-title">Arrastra la planilla de Excel aquí</div>
+          <div class="excel-drop-subtitle">O haz clic para seleccionar el archivo desde tu computadora (.xlsx / .xls / .csv)</div>
+        </div>
+
+        <!-- Barra de Control de Importación -->
+        <div class="import-toolbar" id="adminResumenImportacion" style="display: none; margin-bottom: 1rem; background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 280px;">
+            <span class="badge-counter" id="adminBadgeTotalImportados">0 alumnos detectados</span>
+            <input type="text" id="adminFiltroAlumnosExcel" class="form-control" placeholder="🔍 Filtrar alumnos por DNI o Nombre..." style="padding: 0.4rem 0.75rem; font-size: 0.85rem;">
+          </div>
+          
+          <button type="button" id="btnAdminGuardarLoteInsforge" class="btn btn-success" style="font-size: 0.9rem; padding: 0.55rem 1.25rem;">
+            ☁️ Dar de Alta a Todos en InsForge Cloud
+          </button>
+        </div>
+
+        <!-- Tabla de Alumnos Detectados en la Planilla -->
+        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <table class="table-history">
+            <thead>
+              <tr>
+                <th>Código a Asignar</th>
+                <th>Estudiante</th>
+                <th>DNI</th>
+                <th>Escuela Asignada</th>
+                <th>Materias Acreditadas</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="adminTbodyAlumnosExcel">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b;">
+                  Sube una planilla de Excel arriba para procesar los alumnos y registrarlos masivamente.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PESTAÑA 3: GESTIÓN DE USUARIOS Y ROLES -->
     <section id="tab-usuarios" class="admin-tab-content" style="display: none;">
       <div class="admin-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
@@ -470,6 +533,287 @@
         inputFiltroEscuelas.addEventListener('input', (e) => {
           renderTablaEscuelas(e.target.value);
         });
+      }
+
+      // ==========================================
+      // LÓGICA DE IMPORTACIÓN MASIVA DE EXCEL
+      // ==========================================
+      let alumnosExcelAdmin = [];
+      const dropZoneAdmin = document.getElementById('adminExcelDropZone');
+      const fileInputAdmin = document.getElementById('adminExcelFileInput');
+      const btnDescargarPlantillaAdmin = document.getElementById('btnAdminDescargarPlantilla');
+      const btnGuardarLoteAdmin = document.getElementById('btnAdminGuardarLoteInsforge');
+      const tbodyExcelAdmin = document.getElementById('adminTbodyAlumnosExcel');
+      const badgeTotalAdmin = document.getElementById('adminBadgeTotalImportados');
+      const filtroExcelAdmin = document.getElementById('adminFiltroAlumnosExcel');
+      const resumenImportAdmin = document.getElementById('adminResumenImportacion');
+
+      if (btnDescargarPlantillaAdmin) {
+        btnDescargarPlantillaAdmin.addEventListener('click', () => {
+          descargarPlantillaExcelModelo();
+        });
+      }
+
+      if (fileInputAdmin) {
+        fileInputAdmin.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) procesarExcelAdmin(file);
+        });
+      }
+
+      if (dropZoneAdmin) {
+        dropZoneAdmin.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          dropZoneAdmin.classList.add('dragover');
+        });
+        dropZoneAdmin.addEventListener('dragleave', () => {
+          dropZoneAdmin.classList.remove('dragover');
+        });
+        dropZoneAdmin.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dropZoneAdmin.classList.remove('dragover');
+          const file = e.dataTransfer.files[0];
+          if (file) procesarExcelAdmin(file);
+        });
+      }
+
+      if (filtroExcelAdmin) {
+        filtroExcelAdmin.addEventListener('input', (e) => {
+          renderTablaExcelAdmin(e.target.value);
+        });
+      }
+
+      if (btnGuardarLoteAdmin) {
+        btnGuardarLoteAdmin.addEventListener('click', async () => {
+          await guardarLoteExcelEnInsforge();
+        });
+      }
+
+      async function procesarExcelAdmin(file) {
+        try {
+          if (tbodyExcelAdmin) {
+            tbodyExcelAdmin.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #0369a1;">⌛ Leyendo archivo Excel...</td></tr>`;
+          }
+
+          const data = await file.arrayBuffer();
+          const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+
+          if (!jsonRows || jsonRows.length === 0) {
+            alert('La planilla seleccionada no contiene filas con datos.');
+            if (tbodyExcelAdmin) tbodyExcelAdmin.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #dc2626;">Planilla vacía.</td></tr>`;
+            return;
+          }
+
+          alumnosExcelAdmin = mapearFilasAdmin(jsonRows);
+          renderTablaExcelAdmin();
+          
+          if (resumenImportAdmin) resumenImportAdmin.style.display = 'flex';
+          if (badgeTotalAdmin) badgeTotalAdmin.textContent = `${alumnosExcelAdmin.length} alumnos detectados`;
+
+        } catch (err) {
+          console.error('Error al procesar Excel:', err);
+          alert('Ocurrió un error al procesar el archivo Excel. Asegúrate de que sea .xlsx o .xls válido.');
+        }
+      }
+
+      function normalizar(txt) {
+        return (txt || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+      }
+
+      function formatearDni(val) {
+        const clean = val.replace(/\D/g, '');
+        if (clean.length === 8) return `${clean.slice(0, 2)}.${clean.slice(2, 5)}.${clean.slice(5)}`;
+        if (clean.length === 7) return `${clean.slice(0, 1)}.${clean.slice(1, 4)}.${clean.slice(4)}`;
+        return val;
+      }
+
+      function mapearFilasAdmin(rows) {
+        const escuelas = auth.escuelasCache || [];
+
+        return rows.map((row, index) => {
+          let nombreApellido = '';
+          let apellido = '';
+          let nombre = '';
+          let dni = '';
+          let localidad = 'Mendoza';
+          let escuelaOrigen = '';
+          let cue = '';
+          let anoCursado = '2º';
+          let espacios = [];
+
+          Object.keys(row).forEach(key => {
+            const norm = normalizar(key);
+            const val = (row[key] || '').toString().trim();
+            if (!val) return;
+
+            if (norm.includes('nombre') && norm.includes('apellido') || norm === 'estudiante' || norm === 'alumno') {
+              nombreApellido = val;
+            } else if (norm === 'apellido' || norm === 'apellidos') {
+              apellido = val;
+            } else if (norm === 'nombre' || norm === 'nombres') {
+              nombre = val;
+            } else if (norm === 'dni' || norm === 'documento' || norm.includes('doc')) {
+              dni = formatearDni(val);
+            } else if (norm.includes('escuela') || norm.includes('cens') || norm.includes('institucion')) {
+              escuelaOrigen = val;
+            } else if (norm === 'cue') {
+              cue = val;
+            } else if (norm.includes('localidad') || norm.includes('ciudad') || norm.includes('departamento')) {
+              localidad = val;
+            } else if (norm.includes('materia') || norm.includes('espacio') || norm.includes('asignatura')) {
+              if (val.includes(';') || val.includes(',')) {
+                espacios.push(...val.split(/[;,]/).map(s => s.trim()).filter(s => s.length > 0));
+              } else {
+                espacios.push(val);
+              }
+            }
+          });
+
+          if (!nombreApellido && (apellido || nombre)) {
+            nombreApellido = `${apellido.toUpperCase()}, ${nombre}`;
+          }
+
+          // Vincular con escuela registrada si coincide
+          let escuelaId = null;
+          if (escuelaOrigen) {
+            const match = escuelas.find(e => 
+              escuelaOrigen.toLowerCase().includes(e.numero.toLowerCase()) || 
+              (e.nombre && escuelaOrigen.toLowerCase().includes(e.nombre.toLowerCase()))
+            );
+            if (match) {
+              escuelaId = match.id;
+              escuelaOrigen = match.nombre;
+              if (!cue) cue = match.cue || '';
+              if (!localidad || localidad === 'Mendoza') localidad = match.localidad || 'Mendoza';
+            }
+          }
+
+          if (!escuelaOrigen) escuelaOrigen = 'C.E.N.S. Nº 3-415';
+          if (espacios.length === 0) espacios = ['Lengua y Literatura I (Aprobado)', 'Matemática I (Aprobado)'];
+
+          return {
+            idCertificado: 'CERT-DEPJA-' + Math.floor(100000 + Math.random() * 900000),
+            escuelaId: escuelaId,
+            nombreApellido: nombreApellido || `ALUMNO ${index + 1}`,
+            dni: dni || 'S/DNI',
+            escuelaOrigen: escuelaOrigen,
+            cue: cue,
+            localidad: localidad,
+            anoCursado: anoCursado,
+            ano: new Date().getFullYear().toString(),
+            opcionPedagogica: 'Presencial',
+            espaciosAcreditados: espacios,
+            fechaInscripcion: new Date().toLocaleDateString('es-AR'),
+            fechaEmision: new Date().toLocaleDateString('es-AR'),
+            estado: 'Pendiente de Alta'
+          };
+        }).filter(a => a.nombreApellido && a.nombreApellido.trim() !== '');
+      }
+
+      function renderTablaExcelAdmin(filtro = '') {
+        if (!tbodyExcelAdmin) return;
+        tbodyExcelAdmin.innerHTML = '';
+
+        const q = (filtro || '').toLowerCase().trim();
+        const filtrados = q 
+          ? alumnosExcelAdmin.filter(a => a.nombreApellido.toLowerCase().includes(q) || a.dni.toLowerCase().includes(q) || a.escuelaOrigen.toLowerCase().includes(q))
+          : alumnosExcelAdmin;
+
+        if (filtrados.length === 0) {
+          tbodyExcelAdmin.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #64748b;">No hay alumnos que coincidan con la búsqueda.</td></tr>`;
+          return;
+        }
+
+        filtrados.forEach(a => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><code>${a.idCertificado}</code></td>
+            <td><strong>${a.nombreApellido}</strong></td>
+            <td>${a.dni}</td>
+            <td>${a.escuelaOrigen}</td>
+            <td><small>${a.espaciosAcreditados.slice(0, 2).join(', ')}${a.espaciosAcreditados.length > 2 ? '...' : ''}</small></td>
+            <td><span style="background: ${a.estado.includes('Registrado') ? '#dcfce7' : '#fef3c7'}; color: ${a.estado.includes('Registrado') ? '#15803d' : '#b45309'}; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">${a.estado}</span></td>
+          `;
+          tbodyExcelAdmin.appendChild(tr);
+        });
+      }
+
+      async function guardarLoteExcelEnInsforge() {
+        if (alumnosExcelAdmin.length === 0) {
+          alert('No hay alumnos para guardar.');
+          return;
+        }
+
+        const confirmacion = confirm(`¿Desea registrar ${alumnosExcelAdmin.length} alumnos en la base de datos de InsForge Cloud? Se emitirán sus códigos oficiales.`);
+        if (!confirmacion) return;
+
+        btnGuardarLoteAdmin.disabled = true;
+        btnGuardarLoteAdmin.innerHTML = '⌛ Registrando en la nube...';
+
+        try {
+          const config = window.CONFIG || {};
+          const payload = alumnosExcelAdmin.map(a => window.databaseAPI.formatearParaInsforge(a));
+          const url = `${config.insforge.baseUrl}/api/database/records/${config.insforge.tabla || 'certificados'}`;
+
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: window.databaseAPI.getInsforgeHeaders(),
+            body: JSON.stringify(payload)
+          });
+
+          if (res.ok || res.status === 201) {
+            alumnosExcelAdmin.forEach(a => a.estado = '✅ Registrado en InsForge');
+            renderTablaExcelAdmin();
+            alert(`¡Éxito! Se registraron ${alumnosExcelAdmin.length} alumnos en InsForge Cloud.`);
+            await renderMetricas();
+          } else {
+            const err = await res.text();
+            throw new Error(err);
+          }
+        } catch (err) {
+          console.error('Error en carga masiva:', err);
+          alert('Error al guardar en la nube: ' + err.message);
+        } finally {
+          btnGuardarLoteAdmin.disabled = false;
+          btnGuardarLoteAdmin.innerHTML = '☁️ Dar de Alta a Todos en InsForge Cloud';
+        }
+      }
+
+      function descargarPlantillaExcelModelo() {
+        const datosPlantilla = [
+          {
+            "DNI": "38452891",
+            "Apellido y Nombre": "PEREZ, Juan Carlos",
+            "Escuela de Origen": "C.E.N.S. Nº 3-419",
+            "CUE": "5000419-00",
+            "Localidad": "Godoy Cruz",
+            "Ano Cursado": "2º",
+            "Ano": "2024",
+            "Opcion Pedagogica": "Presencial",
+            "Materias Acreditadas": "Lengua y Literatura I (Aprobado); Matemática I (Aprobado); Ciencias Sociales (Aprobado)",
+            "Fecha Inscripcion": "01/03/2024"
+          },
+          {
+            "DNI": "40123456",
+            "Apellido y Nombre": "GONZALEZ, Maria Laura",
+            "Escuela de Origen": "C.E.N.S. Nº 3-419",
+            "CUE": "5000419-00",
+            "Localidad": "Godoy Cruz",
+            "Ano Cursado": "3º",
+            "Ano": "2024",
+            "Opcion Pedagogica": "Presencial",
+            "Materias Acreditadas": "Lengua y Literatura II (Aprobado); Matemática II (Aprobado); Inglés (Aprobado)",
+            "Fecha Inscripcion": "01/03/2024"
+          }
+        ];
+
+        const worksheet = XLSX.utils.json_to_sheet(datosPlantilla);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Alumnos");
+        XLSX.writeFile(workbook, "Plantilla_Modelo_Alumnos_DEPJA.xlsx");
       }
 
       // Exportar en Excel
