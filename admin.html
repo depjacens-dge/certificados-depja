@@ -339,126 +339,132 @@
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const auth = window.authManager;
-      await auth.init();
-
-      const btnLogout = document.getElementById('btnLogoutAdmin');
-
-      // Verificar si está logueado como Administrador, sino redirigir a login.html
-      if (!auth.esAdmin()) {
-        window.location.href = 'login.html';
-        return;
+      if (auth && auth.init) {
+        await auth.init();
       }
 
-      btnLogout.addEventListener('click', () => {
-        auth.cerrarSesion();
-      });
-
-      // Cargar datos iniciales del panel
-      await cargarDatosPanel();
+      // 1. ASIGNACIÓN INMEDIATA DE EVENTOS (Funciona siempre, sin depender de la red)
+      const btnLogout = document.getElementById('btnLogoutAdmin');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+          auth.cerrarSesion();
+        });
+      }
 
       // Navegación entre pestañas
-      document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+      const tabButtons = document.querySelectorAll('.admin-tab-btn');
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabButtons.forEach(b => b.classList.remove('active'));
           document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
 
           btn.classList.add('active');
           const tabId = btn.getAttribute('data-tab');
-          document.getElementById(tabId).style.display = 'block';
+          const targetSection = document.getElementById(tabId);
+          if (targetSection) targetSection.style.display = 'block';
         });
       });
 
-      // Lógica de Escuelas
-      const tbodyEscuelas = document.getElementById('tbodyEscuelas');
+      // Modales y formularios de Escuelas
       const modalEscuela = document.getElementById('modalEscuelaForm');
       const formEscuela = document.getElementById('formEscuela');
+      const btnNuevaEscuela = document.getElementById('btnNuevaEscuela');
+      const btnCloseModalEscuela = document.getElementById('btnCloseModalEscuela');
 
-      document.getElementById('btnNuevaEscuela').addEventListener('click', () => {
-        document.getElementById('escuelaEditId').value = '';
-        formEscuela.reset();
-        document.getElementById('modalEscuelaTitle').textContent = '🏫 Nueva Escuela / CENS';
-        modalEscuela.classList.add('active');
-      });
+      if (btnNuevaEscuela) {
+        btnNuevaEscuela.addEventListener('click', () => {
+          document.getElementById('escuelaEditId').value = '';
+          if (formEscuela) formEscuela.reset();
+          document.getElementById('modalEscuelaTitle').textContent = '🏫 Nueva Escuela / CENS';
+          if (modalEscuela) modalEscuela.classList.add('active');
+        });
+      }
 
-      document.getElementById('btnCloseModalEscuela').addEventListener('click', () => {
-        modalEscuela.classList.remove('active');
-      });
+      if (btnCloseModalEscuela) {
+        btnCloseModalEscuela.addEventListener('click', () => {
+          if (modalEscuela) modalEscuela.classList.remove('active');
+        });
+      }
 
-      formEscuela.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = {
-          id: document.getElementById('escuelaEditId').value || `cens-${document.getElementById('inputEscuelaNumero').value.replace(/[^0-9-]/g, '')}`,
-          numero: document.getElementById('inputEscuelaNumero').value,
-          nombre: document.getElementById('inputEscuelaNombre').value,
-          cue: document.getElementById('inputEscuelaCue').value,
-          localidad: document.getElementById('inputEscuelaLocalidad').value,
-          departamento: document.getElementById('inputEscuelaDpto').value,
-          email_contacto: document.getElementById('inputEscuelaEmail').value,
-          activa: true
-        };
+      if (formEscuela) {
+        formEscuela.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const data = {
+            id: document.getElementById('escuelaEditId').value || `cens-${document.getElementById('inputEscuelaNumero').value.replace(/[^0-9-]/g, '')}`,
+            numero: document.getElementById('inputEscuelaNumero').value,
+            nombre: document.getElementById('inputEscuelaNombre').value,
+            cue: document.getElementById('inputEscuelaCue').value,
+            localidad: document.getElementById('inputEscuelaLocalidad').value,
+            departamento: document.getElementById('inputEscuelaDpto').value,
+            email_contacto: document.getElementById('inputEscuelaEmail').value,
+            activa: true
+          };
 
-        try {
-          await auth.guardarEscuela(data);
-          modalEscuela.classList.remove('active');
-          alert('Escuela guardada exitosamente.');
-          await renderTablaEscuelas();
-        } catch(err) {
-          alert('Error: ' + err.message);
-        }
-      });
+          try {
+            await auth.guardarEscuela(data);
+            if (modalEscuela) modalEscuela.classList.remove('active');
+            alert('Escuela guardada exitosamente.');
+            await renderTablaEscuelas();
+          } catch(err) {
+            alert('Error al guardar escuela: ' + err.message);
+          }
+        });
+      }
 
-      // Lógica de Usuarios / Accesos
+      // Modales y formularios de Usuarios
       const modalUsuario = document.getElementById('modalUsuarioForm');
       const formUsuario = document.getElementById('formUsuario');
+      const btnNuevoUsuario = document.getElementById('btnNuevoUsuario');
+      const btnCloseModalUsuario = document.getElementById('btnCloseModalUsuario');
       const selectRol = document.getElementById('inputUsuarioRol');
       const groupSelectEscuela = document.getElementById('groupSelectEscuela');
 
-      selectRol.addEventListener('change', () => {
-        groupSelectEscuela.style.display = selectRol.value === 'admin' ? 'none' : 'block';
-      });
-
-      document.getElementById('btnNuevoUsuario').addEventListener('click', async () => {
-        formUsuario.reset();
-        await rellenarSelectEscuelas();
-        modalUsuario.classList.add('active');
-      });
-
-      document.getElementById('btnCloseModalUsuario').addEventListener('click', () => {
-        modalUsuario.classList.remove('active');
-      });
-
-      formUsuario.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = {
-          usuario: document.getElementById('inputUsuarioUser').value,
-          password: document.getElementById('inputUsuarioPass').value,
-          nombre_completo: document.getElementById('inputUsuarioNombre').value,
-          email: document.getElementById('inputUsuarioEmail').value,
-          rol: document.getElementById('inputUsuarioRol').value,
-          escuela_id: document.getElementById('inputUsuarioEscuela').value
-        };
-
-        try {
-          await auth.guardarUsuario(data);
-          modalUsuario.classList.remove('active');
-          alert('Acceso creado exitosamente.');
-          await renderTablaUsuarios();
-        } catch(err) {
-          alert('Error: ' + err.message);
-        }
-      });
-
-      // Exportar global en Excel
-      document.getElementById('btnExportarGlobalExcel').addEventListener('click', async () => {
-        await window.databaseAPI.exportarAExcelCSV();
-      });
-
-      async function cargarDatosPanel() {
-        await renderTablaEscuelas();
-        await renderTablaUsuarios();
-        await renderMetricas();
+      if (selectRol) {
+        selectRol.addEventListener('change', () => {
+          if (groupSelectEscuela) {
+            groupSelectEscuela.style.display = selectRol.value === 'admin' ? 'none' : 'block';
+          }
+        });
       }
 
+      if (btnNuevoUsuario) {
+        btnNuevoUsuario.addEventListener('click', async () => {
+          if (formUsuario) formUsuario.reset();
+          await rellenarSelectEscuelas();
+          if (modalUsuario) modalUsuario.classList.add('active');
+        });
+      }
+
+      if (btnCloseModalUsuario) {
+        btnCloseModalUsuario.addEventListener('click', () => {
+          if (modalUsuario) modalUsuario.classList.remove('active');
+        });
+      }
+
+      if (formUsuario) {
+        formUsuario.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const data = {
+            usuario: document.getElementById('inputUsuarioUser').value,
+            password: document.getElementById('inputUsuarioPass').value,
+            nombre_completo: document.getElementById('inputUsuarioNombre').value,
+            email: document.getElementById('inputUsuarioEmail').value,
+            rol: document.getElementById('inputUsuarioRol').value,
+            escuela_id: document.getElementById('inputUsuarioEscuela').value
+          };
+
+          try {
+            await auth.guardarUsuario(data);
+            if (modalUsuario) modalUsuario.classList.remove('active');
+            alert('Acceso creado exitosamente.');
+            await renderTablaUsuarios();
+          } catch(err) {
+            alert('Error al guardar usuario: ' + err.message);
+          }
+        });
+      }
+
+      // Buscador en vivo de escuelas
       const inputFiltroEscuelas = document.getElementById('filtroEscuelas');
       if (inputFiltroEscuelas) {
         inputFiltroEscuelas.addEventListener('input', (e) => {
@@ -466,9 +472,50 @@
         });
       }
 
+      // Exportar en Excel
+      const btnExport = document.getElementById('btnExportarGlobalExcel');
+      if (btnExport) {
+        btnExport.addEventListener('click', async () => {
+          await window.databaseAPI.exportarAExcelCSV();
+        });
+      }
+
+      // 2. VERIFICACIÓN DE SESIÓN ADMINISTRADOR
+      if (!auth.esAdmin()) {
+        // Si no está logueado, redirigir al portal
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // 3. CARGA DE DATOS ASÍNCRONOS
+      await cargarDatosPanel();
+
+      async function cargarDatosPanel() {
+        try {
+          await renderTablaEscuelas();
+        } catch (e) {
+          console.warn('Error renderizando escuelas:', e);
+        }
+
+        try {
+          await renderTablaUsuarios();
+        } catch (e) {
+          console.warn('Error renderizando usuarios:', e);
+        }
+
+        try {
+          await renderMetricas();
+        } catch (e) {
+          console.warn('Error renderizando métricas:', e);
+        }
+      }
+
       async function renderTablaEscuelas(filtroTexto = '') {
+        const tbody = document.getElementById('tbodyEscuelas');
+        if (!tbody) return;
+
         const escuelas = await auth.cargarEscuelas();
-        tbodyEscuelas.innerHTML = '';
+        tbody.innerHTML = '';
         
         const q = (filtroTexto || '').toLowerCase().trim();
         const filtradas = q 
@@ -481,7 +528,7 @@
           : escuelas;
 
         if (filtradas.length === 0) {
-          tbodyEscuelas.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">No se encontraron escuelas con ese criterio de búsqueda.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">No se encontraron escuelas con ese criterio de búsqueda.</td></tr>`;
           return;
         }
 
@@ -494,15 +541,15 @@
             <td>${esc.localidad || 'N/A'}</td>
             <td><span style="background: #dcfce7; color: #15803d; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">Activa</span></td>
             <td>
-              <button class="btn btn-outline btn-editar-escuela" data-id="${esc.id}" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+              <button type="button" class="btn btn-outline btn-editar-escuela" data-id="${esc.id}" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
                 ✏️ Editar
               </button>
             </td>
           `;
-          tbodyEscuelas.appendChild(tr);
+          tbody.appendChild(tr);
         });
 
-        tbodyEscuelas.querySelectorAll('.btn-editar-escuela').forEach(btn => {
+        tbody.querySelectorAll('.btn-editar-escuela').forEach(btn => {
           btn.addEventListener('click', (e) => {
             const id = e.currentTarget.getAttribute('data-id');
             const esc = escuelas.find(x => x.id === id);
@@ -515,7 +562,7 @@
               document.getElementById('inputEscuelaDpto').value = esc.departamento || '';
               document.getElementById('inputEscuelaEmail').value = esc.email_contacto || '';
               document.getElementById('modalEscuelaTitle').textContent = '✏️ Editar Escuela ' + esc.numero;
-              modalEscuela.classList.add('active');
+              if (modalEscuela) modalEscuela.classList.add('active');
             }
           });
         });
@@ -524,6 +571,7 @@
       async function rellenarSelectEscuelas() {
         const escuelas = await auth.cargarEscuelas();
         const select = document.getElementById('inputUsuarioEscuela');
+        if (!select) return;
         select.innerHTML = '';
         escuelas.forEach(e => {
           const opt = document.createElement('option');
@@ -534,9 +582,11 @@
       }
 
       async function renderTablaUsuarios() {
+        const tbody = document.getElementById('tbodyUsuarios');
+        if (!tbody) return;
+
         const usuarios = await auth.obtenerTodosLosUsuarios();
         const escuelas = await auth.cargarEscuelas();
-        const tbody = document.getElementById('tbodyUsuarios');
         tbody.innerHTML = '';
 
         usuarios.forEach(u => {
@@ -559,11 +609,16 @@
         const escuelas = await auth.cargarEscuelas();
         const usuarios = await auth.obtenerTodosLosUsuarios();
 
-        document.getElementById('statTotalCertificados').textContent = certificados.length;
-        document.getElementById('statTotalEscuelas').textContent = escuelas.length;
-        document.getElementById('statTotalUsuarios').textContent = usuarios.length;
+        const stCert = document.getElementById('statTotalCertificados');
+        const stEsc = document.getElementById('statTotalEscuelas');
+        const stUsr = document.getElementById('statTotalUsuarios');
+
+        if (stCert) stCert.textContent = certificados.length;
+        if (stEsc) stEsc.textContent = escuelas.length;
+        if (stUsr) stUsr.textContent = usuarios.length;
 
         const tbody = document.getElementById('tbodyHistorialGlobal');
+        if (!tbody) return;
         tbody.innerHTML = '';
         certificados.slice(0, 50).forEach(c => {
           const tr = document.createElement('tr');
