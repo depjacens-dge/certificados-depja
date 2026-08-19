@@ -43,6 +43,28 @@ body {
   align-items: center;
 }
 
+.app-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.app-logo-box {
+  background: #ffffff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.app-logo-img {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+}
+
 .app-title-group h1 {
   font-size: 1.2rem;
   font-weight: 700;
@@ -329,25 +351,14 @@ body {
 .cert-logo-dge {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: flex-end;
 }
 
-.dge-brand {
-  font-size: 26pt;
-  font-weight: 900;
-  color: #0055a5;
-  letter-spacing: -1px;
-  line-height: 1;
-}
-
-.dge-text {
-  font-size: 7.5pt;
-  font-weight: 700;
-  color: #0055a5;
-  line-height: 1.1;
-  text-transform: uppercase;
-  border-left: 2px solid #0055a5;
-  padding-left: 0.4rem;
+.cert-logo-img {
+  height: 14mm;
+  max-height: 52px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Título Principal */
@@ -565,14 +576,14 @@ body {
 .footer-logos-mendoza {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: flex-end;
 }
 
-.mendoza-text {
-  font-size: 14pt;
-  font-weight: 900;
-  color: #0055a5;
-  letter-spacing: 1px;
+.cert-footer-logo-img {
+  height: 10mm;
+  max-height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Modal y Toast */
@@ -664,6 +675,73 @@ body {
 .toast.show {
   transform: translateY(0);
   opacity: 1;
+}
+
+/* ==========================================================================
+   ESTILOS DE IMPORTACIÓN DE PLANILLAS EXCEL / CSV
+   ========================================================================== */
+
+.excel-drop-zone {
+  border: 2px dashed #3b82f6;
+  background-color: #f0f9ff;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.excel-drop-zone:hover, .excel-drop-zone.dragover {
+  background-color: #e0f2fe;
+  border-color: #0284c7;
+  transform: scale(1.005);
+}
+
+.excel-drop-icon {
+  width: 48px;
+  height: 48px;
+  color: #0284c7;
+  margin-bottom: 0.75rem;
+}
+
+.excel-drop-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0369a1;
+  margin-bottom: 0.25rem;
+}
+
+.excel-drop-subtitle {
+  font-size: 0.825rem;
+  color: #64748b;
+}
+
+.import-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.badge-counter {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.modal-xl {
+  max-width: 1050px !important;
+  width: 95% !important;
 }
 
 /* ==========================================================================

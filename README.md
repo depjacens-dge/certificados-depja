@@ -4,16 +4,26 @@ Sistema web en la nube para la emisión, impresión A4 oficial, registro central
 
 ---
 
-## 📌 Guía de Despliegue en GitHub Pages y Google Drive
+## 🗄️ Base de Datos en la Nube (InsForge PostgreSQL)
 
-El proyecto ya está inicializado con **Git** y listo para subirse a GitHub.
+El sistema está conectado directamente con **InsForge** (`https://44t68c5e.us-east.insforge.app`), proporcionando:
+
+* **Portal de Acceso Institucional ([`login.html`](login.html))**: Ventana de ingreso oficial con selector de Escuelas/CENS y acceso exclusivo para el Administrador General.
+* **Panel de Administración Central ([`admin.html`](admin.html))**: Módulo para dar de alta, editar y gestionar todas las escuelas de Mendoza y sus cuentas de acceso.
+* **Subida y Procesamiento de Planillas Excel (.xlsx, .xls, .csv)**: Módulo interactivo con arrastrar y soltar para dar de alta nóminas completas de alumnos en lote o cargarlos individualmente al formulario.
+* **Almacenamiento permanente y seguro** de todos los certificados emitidos en la nube (**InsForge PostgreSQL**).
+* **Validación instantánea por Código QR** en [`validar.html`](validar.html) (< 100 ms).
+* **Exportación directa a Excel / CSV** desde el botón de Historial para los administrativos.
+* **Respaldo local automático (LocalStorage)** para operar incluso con cortes de conexión.
 
 ---
 
-### Paso 1: Subir a tu GitHub Pages (Alojamiento Gratuito)
+## 📌 Guía de Despliegue en GitHub Pages
 
-1. Ingresa a tu cuenta de GitHub ([github.com/new](https://github.com/new)) y crea un nuevo repositorio público (ejemplo: `certificados-depja`).
-2. Abre la terminal en la carpeta del proyecto y ejecuta:
+El proyecto ya está inicializado con **Git** y listo para subirse a GitHub:
+
+1. Ingresa a tu cuenta de GitHub ([github.com/new](https://github.com/new)) y crea tu repositorio (ejemplo: `certificados-depja`).
+2. En la terminal ejecuta:
 
 ```bash
 git remote add origin https://github.com/TU_USUARIO/certificados-depja.git
@@ -21,43 +31,26 @@ git branch -M main
 git push -u origin main
 ```
 
-3. En GitHub, ve a **Settings -> Pages**.
-4. En **Source**, selecciona `Deploy from a branch` y elige la rama **`main`** / `/ (root)`.
-5. En 1 minuto tendrás tu enlace público de GitHub Pages (ejemplo: `https://TU_USUARIO.github.io/certificados-depja/`).
+3. En GitHub, ve a **Settings -> Pages** y selecciona la rama **`main`**.
+4. ¡Listo! Tendrás la aplicación funcionando online con base de datos en la nube.
 
 ---
 
-### Paso 2: Conectar con Google Drive (Google Sheets)
+### Configuración (`config.js`)
 
-Para que todos los certificados emitidos se guarden automáticamente en tu Google Drive:
-
-1. Abre tu **Google Drive** ([drive.google.com](https://drive.google.com)).
-2. Crea una nueva Planilla de Google Sheets llamada `Registro_Certificados_DEPJA`.
-3. En el menú superior, ve a **Extensiones -> Apps Script**.
-4. Borra el código existente y pega todo el contenido del archivo [`google-apps-script/Code.gs`](google-apps-script/Code.gs).
-5. Haz clic en el botón azul **Desplegar -> Nuevo despliegue**.
-6. Selecciona:
-   - **Tipo**: Aplicación Web
-   - **Ejecutar como**: Yo
-   - **Quién tiene acceso**: Cualquier persona (*Anyone*)
-7. Haz clic en **Desplegar** y copia la URL generada (`https://script.google.com/macros/s/.../exec`).
-
----
-
-### Paso 3: Configurar o Cambiar Datos (`config.js`)
-
-Abre el archivo **[`config.js`](config.js)**. Es el único lugar que debes editar:
+Todos los parámetros de conexión están centralizados en **[`config.js`](config.js)**:
 
 ```javascript
 const CONFIG = {
-  // 1. Correo del Responsable (Cambiar por el tuyo o el del cliente en el futuro)
-  correoResponsable: 'tu-correo@ejemplo.com', 
+  // Datos del Responsable
+  correoResponsable: 'admin.depja@educacion.gob.ar', 
 
-  // 2. URL de Google Apps Script (Obtenida en el Paso 2)
-  googleAppsScriptUrl: 'https://script.google.com/macros/s/AKfycb.../exec', 
-
-  // 3. Dominio de GitHub Pages
-  appBaseUrl: window.location.origin
+  // Base de Datos InsForge
+  insforge: {
+    baseUrl: 'https://44t68c5e.us-east.insforge.app',
+    anonKey: 'anon_8f4f89d0ee4d18215ac544fd1126bbfb3d74ce02399290ffb8cc6e519a3ceccb',
+    tabla: 'certificados'
+  }
 };
 ```
 

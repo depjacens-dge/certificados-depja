@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Generador de Certificados - Convenio Seguridad Privada (DEPJA Mendoza)</title>
   
-  <!-- Estilos y Librería QR -->
+  <!-- Estilos y Librerías (QR y Excel SheetJS) -->
   <link rel="stylesheet" href="css/styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <!-- Configuración Centralizada -->
   <script src="config.js"></script>
@@ -16,13 +17,28 @@
 
   <!-- Header Superior de la Aplicación -->
   <header class="app-header">
-    <div class="app-title-group">
-      <h1>DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS</h1>
-      <p>Sistema de Emisión de Certificados — Convenio Seguridad Privada (DGE Mendoza)</p>
+    <div class="app-header-brand">
+      <div class="app-logo-box">
+        <img src="img/marca-dge-horizontal.png" alt="Logo DGE Mendoza" class="app-logo-img">
+      </div>
+      <div class="app-title-group">
+        <h1>DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS</h1>
+        <p>Sistema de Emisión de Certificados — Convenio Seguridad Privada (DGE Mendoza)</p>
+      </div>
     </div>
-    <div class="config-badge" id="badgeEstado">
-      <span class="dot-status"></span>
-      <span id="txtEstadoConexion">Modo Listo / Nube (Vercel & Google Drive)</span>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <a href="admin.html" id="btnIrAdminPanel" class="btn btn-outline" style="color: #ffffff; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.12); font-size: 0.8rem; padding: 0.4rem 0.8rem; display: none;">
+        ⚙️ Panel de Administración
+      </a>
+
+      <div class="config-badge" id="badgeUsuarioRol" style="cursor: pointer;" title="Haga clic para cambiar de usuario">
+        <span class="dot-status" id="dotRol" style="background-color: #10b981;"></span>
+        <span id="txtUsuarioRol">Modo Invitado / Demo</span>
+      </div>
+
+      <button type="button" id="btnLogoutIndex" class="btn btn-outline" style="color: #fca5a5; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.15); font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+        🚪 Salir / Cambiar Escuela
+      </button>
     </div>
   </header>
 
@@ -53,6 +69,15 @@
             <label for="inputLocalidad">Localidad *</label>
             <input type="text" id="inputLocalidad" class="form-control" required placeholder="Ej: Mendoza Capital">
           </div>
+        </div>
+
+        <!-- Selector de Escuela / CENS Registrado -->
+        <div class="form-group" id="containerSelectEscuela">
+          <label for="selectEscuelaPredefinida">Seleccionar Institución (C.E.N.S.)</label>
+          <select id="selectEscuelaPredefinida" class="form-control" style="font-weight: 600; color: #0055a5;">
+            <option value="">-- Seleccionar Escuela / CENS --</option>
+            <!-- Llenado dinámicamente con escuelas de InsForge -->
+          </select>
         </div>
 
         <!-- Escuela de Origen, CUE, Año -->
@@ -136,6 +161,11 @@
 
         <!-- Botones de Acción -->
         <div class="action-buttons">
+          <button type="button" id="btnImportarExcel" class="btn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3);">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            📊 Subir Planilla Excel de Alumnos
+          </button>
+
           <button type="button" id="btnImprimir" class="btn btn-primary">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-4 0h-4v-4h4v4z"></path></svg>
             Imprimir / Descargar PDF (A4)
@@ -143,7 +173,7 @@
 
           <button type="button" id="btnGuardarDrive" class="btn btn-success">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-            Guardar en Base de Datos (Google Drive)
+            Guardar en Base de Datos (InsForge)
           </button>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
@@ -181,10 +211,7 @@
           </div>
 
           <div class="cert-logo-dge">
-            <span class="dge-brand">DG<em style="font-style: italic; font-weight: 400; color: #eab308;">e</em></span>
-            <div class="dge-text">
-              DIRECCIÓN GENERAL<br>DE ESCUELAS
-            </div>
+            <img src="img/marca-dge-horizontal.png" alt="Logo DGE Mendoza" class="cert-logo-img">
           </div>
         </header>
 
@@ -295,17 +322,7 @@
           </div>
 
           <div class="footer-logos-mendoza">
-            <span class="dge-brand" style="font-size: 20pt; color: #0055a5;">DG<em style="font-style: italic; font-weight: 400; color: #eab308;">e</em></span>
-            <span style="font-size: 16pt; color: #cbd5e1; margin: 0 0.4rem;">|</span>
-            
-            <!-- Escudo Mendoza SVG -->
-            <svg width="28" height="34" viewBox="0 0 100 120" fill="none">
-              <ellipse cx="50" cy="55" rx="38" ry="48" fill="#ffffff" stroke="#0055a5" stroke-width="4"/>
-              <path d="M 12 55 Q 50 25 88 55 Q 50 85 12 55 Z" fill="#00a6e0"/>
-              <circle cx="50" cy="55" r="10" fill="#eab308"/>
-            </svg>
-
-            <span class="mendoza-text">MENDOZA</span>
+            <img src="img/marca-dge-horizontal.png" alt="Logo DGE Mendoza" class="cert-footer-logo-img">
           </div>
         </footer>
 
@@ -317,9 +334,14 @@
   <!-- MODAL HISTORIAL -->
   <div class="modal-overlay" id="modalHistorial">
     <div class="modal-card">
-      <div class="modal-header">
-        <h3 style="font-size: 1.1rem; color: #0055a5;">📁 Historial de Certificados Emitidos</h3>
-        <button type="button" class="btn-icon" id="btnCloseModal">✕</button>
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.1rem; color: #0055a5; margin: 0;">📁 Historial de Certificados (InsForge Cloud)</h3>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <button type="button" id="btnExportarExcel" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; color: #047857; border-color: #10b981;">
+            📥 Descargar en Excel (.csv)
+          </button>
+          <button type="button" class="btn-icon" id="btnCloseModal">✕</button>
+        </div>
       </div>
       <div class="modal-body">
         <table class="table-history">
@@ -340,13 +362,117 @@
     </div>
   </div>
 
+  <!-- MODAL IMPORTAR PLANILLA EXCEL -->
+  <div class="modal-overlay" id="modalImportarExcel">
+    <div class="modal-card modal-xl">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <svg width="22" height="22" fill="none" stroke="#0284c7" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <h3 style="font-size: 1.15rem; color: #0369a1; margin: 0;">Subir Planilla Excel / Dar de Alta Alumnos</h3>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <button type="button" id="btnDescargarPlantilla" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; color: #0369a1; border-color: #38bdf8;">
+            📥 Descargar Planilla Modelo (.xlsx)
+          </button>
+          <button type="button" class="btn-icon" id="btnCloseModalImport">✕</button>
+        </div>
+      </div>
+      
+      <div class="modal-body">
+        
+        <!-- Zona Drag & Drop -->
+        <div class="excel-drop-zone" id="excelDropZone" onclick="document.getElementById('excelFileInput').click();">
+          <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
+          <svg class="excel-drop-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          <div class="excel-drop-title">Arrastra tu planilla de Excel (.xlsx / .xls / .csv) aquí</div>
+          <div class="excel-drop-subtitle">O haz clic para seleccionar el archivo desde tu computadora</div>
+        </div>
+
+        <!-- Barra de Búsqueda y Botón Guardar en Lote -->
+        <div class="import-toolbar" id="resumenImportacion" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 250px;">
+            <span class="badge-counter" id="badgeTotalImportados">0 alumnos</span>
+            <input type="text" id="filtroAlumnosExcel" class="form-control" placeholder="🔍 Buscar por DNI, Nombre o Escuela..." style="padding: 0.4rem 0.75rem; font-size: 0.85rem;">
+          </div>
+          
+          <button type="button" id="btnGuardarLoteInsforge" class="btn btn-success" style="font-size: 0.85rem; padding: 0.45rem 1rem; white-space: nowrap;">
+            ☁️ Guardar Todos en InsForge Cloud
+          </button>
+        </div>
+
+        <!-- Tabla de Alumnos Detectados -->
+        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <table class="table-history">
+            <thead>
+              <tr>
+                <th>ID Certificado</th>
+                <th>Estudiante</th>
+                <th>DNI</th>
+                <th>Escuela / Año</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyAlumnosExcel">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
+                  Sube un archivo de Excel para previsualizar los alumnos y darles de alta.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL INICIAR SESIÓN / CAMBIAR ROL -->
+  <div class="modal-overlay" id="modalLoginApp">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 style="color: #0055a5; font-size: 1.15rem; margin: 0;">🔐 Acceso al Sistema DEPJA</h3>
+        <button type="button" class="btn-icon" id="btnCloseModalLogin">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1.2rem;">
+          Inicia sesión con tu usuario de <strong>Escuela / CENS</strong> o como <strong>Administrador Central</strong>.
+        </p>
+
+        <form id="formLoginApp">
+          <div class="form-group">
+            <label for="loginUserInput">Usuario *</label>
+            <input type="text" id="loginUserInput" class="form-control" placeholder="Ej: cens3419 o admin" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassInput">Contraseña *</label>
+            <input type="password" id="loginPassInput" class="form-control" placeholder="Contraseña..." required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+            Ingresar
+          </button>
+        </form>
+
+        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b;">
+          <strong>Usuarios de Demostración:</strong><br>
+          • <strong>Admin:</strong> <code>admin</code> (clave: <code>admin123</code>)<br>
+          • <strong>CENS 3-419:</strong> <code>cens3419</code> (clave: <code>cens3419</code>)<br>
+          • <strong>CENS 3-415:</strong> <code>cens3415</code> (clave: <code>cens3415</code>)
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICACIÓN -->
   <div class="toast" id="toastNotification">
     <span class="toast-message">Notificación</span>
   </div>
 
   <!-- Scripts -->
+  <script src="js/auth.js"></script>
   <script src="js/drive-api.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/excel-import.js"></script>
 </body>
 </html>

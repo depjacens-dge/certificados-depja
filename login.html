@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Acceso Oficial - DEPJA Mendoza (Convenio Seguridad Privada)</title>
+  
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="config.js"></script>
+  <script src="js/auth.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      font-family: 'Roboto', 'Inter', system-ui, sans-serif;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 480px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .login-header {
+      background: #ffffff;
+      padding: 2rem 2rem 1.25rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .login-logo-img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      margin-bottom: 1rem;
+    }
+
+    .login-header h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0055a5;
+      text-transform: uppercase;
+      line-height: 1.3;
+    }
+
+    .login-header p {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 0.35rem;
+      font-weight: 500;
+    }
+
+    .login-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #f1f5f9;
+      padding: 0.4rem;
+      margin: 1.25rem 1.75rem 0.5rem 1.75rem;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .login-tab-btn {
+      padding: 0.65rem 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .login-tab-btn.active {
+      background-color: #ffffff;
+      color: #0055a5;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    }
+
+    .login-body {
+      padding: 1.75rem 2rem 2rem 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 0.4rem;
+    }
+
+    .login-footer {
+      text-align: center;
+      padding-top: 1rem;
+      border-top: 1px solid #f1f5f9;
+      font-size: 0.775rem;
+      color: #94a3b8;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.85rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #0066b2 0%, #004d88 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 102, 178, 0.3);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(135deg, #0055a5 0%, #003b68 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(0, 102, 178, 0.4);
+    }
+
+    .active-session-banner {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    
+    <!-- Encabezado Institucional -->
+    <header class="login-header">
+      <img src="img/marca-dge-horizontal.png" alt="Logo DGE Mendoza" class="login-logo-img">
+      <h1>DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS</h1>
+      <p>Sistema Digital de Emisión de Certificados — Convenio Seguridad Privada</p>
+    </header>
+
+    <!-- Banner si ya hay sesión activa -->
+    <div id="bannerSesionActiva" class="active-session-banner" style="display: none; margin: 1.25rem 1.75rem 0 1.75rem;">
+      <div>
+        <strong style="font-size: 0.85rem; color: #065f46; display: block;" id="txtSesionActivaNombre">Sesión activa</strong>
+        <span style="font-size: 0.75rem; color: #047857;" id="txtSesionActivaRol">Rol</span>
+      </div>
+      <a href="index.html" class="btn btn-success" style="font-size: 0.8rem; padding: 0.4rem 0.8rem; white-space: nowrap;">
+        Continuar ➔
+      </a>
+    </div>
+
+    <!-- Pestañas de Acceso -->
+    <nav class="login-tabs">
+      <button type="button" class="login-tab-btn active" id="tabBtnEscuela" data-mode="escuela">
+        🏫 Acceso Escuela / CENS
+      </button>
+      <button type="button" class="login-tab-btn" id="tabBtnAdmin" data-mode="admin">
+        👑 Administración Central
+      </button>
+    </nav>
+
+    <!-- Cuerpo de Formulario -->
+    <div class="login-body">
+      
+      <!-- FORMULARIO 1: ACCESO ESCUELA / CENS -->
+      <form id="formLoginEscuela">
+        <div class="form-group">
+          <label for="selectEscuelaLogin">1. Seleccionar Institución (C.E.N.S.) *</label>
+          <select id="selectEscuelaLogin" class="form-control" required style="font-weight: 600; color: #0055a5; padding: 0.7rem;">
+            <option value="">⌛ Cargando escuelas desde el sistema...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="passEscuelaLogin">2. Clave de Acceso de la Escuela *</label>
+          <input type="password" id="passEscuelaLogin" class="form-control" placeholder="Ingrese la clave institucional..." required style="padding: 0.7rem;">
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmitEscuela">
+          Ingresar al Panel de la Escuela ➔
+        </button>
+      </form>
+
+      <!-- FORMULARIO 2: ACCESO ADMINISTRATIVO CENTRAL -->
+      <form id="formLoginAdmin" style="display: none;">
+        <div class="form-group">
+          <label for="userAdminLogin">Usuario Administrador *</label>
+          <input type="text" id="userAdminLogin" class="form-control" placeholder="admin" required value="admin" style="padding: 0.7rem;">
+        </div>
+
+        <div class="form-group">
+          <label for="passAdminLogin">Contraseña de Administrador *</label>
+          <input type="password" id="passAdminLogin" class="form-control" placeholder="Contraseña..." required value="admin123" style="padding: 0.7rem;">
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmitAdmin">
+          Ingresar al Panel de Control ➔
+        </button>
+      </form>
+
+      <div class="login-footer" style="margin-top: 1.5rem;">
+        <a href="validar.html" target="_blank" style="color: #0066b2; text-decoration: none; font-weight: 600;">
+          🔍 Portal Público de Verificación por Código QR ↗
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <footer style="margin-top: 2rem; text-align: center; color: rgba(255,255,255,0.6); font-size: 0.775rem;">
+    Gobierno de Mendoza — Dirección General de Escuelas (DGE)
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const auth = window.authManager;
+      await auth.init();
+
+      const selectEscuela = document.getElementById('selectEscuelaLogin');
+      const tabEscuela = document.getElementById('tabBtnEscuela');
+      const tabAdmin = document.getElementById('tabBtnAdmin');
+      const formEscuela = document.getElementById('formLoginEscuela');
+      const formAdmin = document.getElementById('formLoginAdmin');
+      const bannerSesion = document.getElementById('bannerSesionActiva');
+
+      // Verificar si ya hay una sesión activa
+      if (auth.currentUser) {
+        bannerSesion.style.display = 'flex';
+        document.getElementById('txtSesionActivaNombre').textContent = `Sesión iniciada: ${auth.currentUser.nombre_completo}`;
+        document.getElementById('txtSesionActivaRol').textContent = auth.esAdmin() ? '👑 Administrador General' : '🏫 Escuela / CENS Asignado';
+      }
+
+      // Cargar lista de escuelas en el selector
+      const escuelas = await auth.cargarEscuelas();
+      selectEscuela.innerHTML = '<option value="">-- Seleccione su Escuela / CENS --</option>';
+      escuelas.forEach(esc => {
+        const opt = document.createElement('option');
+        opt.value = esc.id;
+        opt.textContent = `${esc.numero} — ${esc.nombre} (${esc.localidad || ''})`;
+        selectEscuela.appendChild(opt);
+      });
+
+      // Cambio de pestañas
+      tabEscuela.addEventListener('click', () => {
+        tabEscuela.classList.add('active');
+        tabAdmin.classList.remove('active');
+        formEscuela.style.display = 'block';
+        formAdmin.style.display = 'none';
+      });
+
+      tabAdmin.addEventListener('click', () => {
+        tabAdmin.classList.add('active');
+        tabEscuela.classList.remove('active');
+        formAdmin.style.display = 'block';
+        formEscuela.style.display = 'none';
+      });
+
+      // Envío de Formulario Escuela
+      formEscuela.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const escId = selectEscuela.value;
+        const pass = document.getElementById('passEscuelaLogin').value;
+
+        const btn = document.getElementById('btnSubmitEscuela');
+        btn.disabled = true;
+        btn.innerHTML = '⌛ Verificando acceso...';
+
+        const res = await auth.iniciarSesionPorEscuela(escId, pass);
+        if (res.exito) {
+          window.location.href = 'index.html';
+        } else {
+          alert(res.mensaje);
+          btn.disabled = false;
+          btn.innerHTML = 'Ingresar al Panel de la Escuela ➔';
+        }
+      });
+
+      // Envío de Formulario Administrador
+      formAdmin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('userAdminLogin').value;
+        const pass = document.getElementById('passAdminLogin').value;
+
+        const btn = document.getElementById('btnSubmitAdmin');
+        btn.disabled = true;
+        btn.innerHTML = '⌛ Verificando acceso...';
+
+        const res = await auth.iniciarSesion(user, pass);
+        if (res.exito && auth.esAdmin()) {
+          window.location.href = 'admin.html';
+        } else {
+          alert('Credenciales no válidas o no posee permisos de Administrador.');
+          btn.disabled = false;
+          btn.innerHTML = 'Ingresar al Panel de Control ➔';
+        }
+      });
+
+    });
+  </script>
+</body>
+</html>

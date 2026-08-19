@@ -39,8 +39,8 @@ async function ejecutarVerificacion(codigoODni) {
     </div>
   `;
 
-  // Llamada al backend de Google Drive / Local
-  const resultado = await window.driveAPI.buscarCertificado(codigoODni);
+  // Llamada al backend de InsForge Cloud / Google Drive / Local
+  const resultado = await (window.databaseAPI || window.driveAPI).buscarCertificado(codigoODni);
 
   if (resultado.encontrado) {
     const d = resultado.data;

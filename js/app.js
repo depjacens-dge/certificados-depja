@@ -2,9 +2,13 @@
  * LÓGICA PRINCIPAL DE LA APLICACIÓN DE CERTIFICADOS DEPJA MENDOZA
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const auth = window.authManager || {};
+  if (auth.init) await auth.init();
+
   // Estado inicial
   const state = {
+    escuelaId: null,
     nombreApellido: 'PÉREZ, Juan Carlos',
     localidad: 'Mendoza Capital',
     dni: '38.452.891',
@@ -33,8 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnVerHistorial = document.getElementById('btnVerHistorial');
   const btnLimpiar = document.getElementById('btnLimpiar');
   const inputFirmaImg = document.getElementById('inputFirmaImg');
+  const selectEscuela = document.getElementById('selectEscuelaPredefinida');
 
   // Inicialización
+  await sincronizarEstadoAutenticacion();
   initFormValues();
   renderPreview();
   setupEventListeners();
@@ -150,15 +156,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnGuardarDrive.addEventListener('click', async () => {
       btnGuardarDrive.disabled = true;
-      btnGuardarDrive.innerHTML = `⌛ Guardando...`;
+      btnGuardarDrive.innerHTML = `⌛ Guardando en InsForge...`;
 
-      const res = await window.driveAPI.guardarCertificado(state);
+      const res = await window.databaseAPI.guardarCertificado(state);
       
       mostrarToast(res.mensaje);
       btnGuardarDrive.disabled = false;
       btnGuardarDrive.innerHTML = `
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-        Guardar en Base de Datos (Google Drive)
+        Guardar en Base de Datos (InsForge)
       `;
     });
 
@@ -180,6 +186,106 @@ document.addEventListener('DOMContentLoaded', () => {
       renderPreview();
       mostrarToast('Formulario restablecido para un nuevo certificado.');
     });
+
+    // Evento del selector de escuelas registradas
+    if (selectEscuela) {
+      selectEscuela.addEventListener('change', (e) => {
+        const id = e.target.value;
+        const escuela = (auth.escuelasCache || []).find(x => x.id === id);
+        if (escuela) {
+          state.escuelaId = escuela.id;
+          state.escuelaOrigen = escuela.nombre;
+          state.cue = escuela.cue || '';
+          state.localidad = escuela.localidad || '';
+          
+          document.getElementById('inputEscuela').value = state.escuelaOrigen;
+          document.getElementById('inputCue').value = state.cue;
+          document.getElementById('inputLocalidad').value = state.localidad;
+
+          renderPreview();
+          mostrarToast(`Escuela ${escuela.numero} seleccionada.`);
+        }
+      });
+    }
+
+    const btnLogout = document.getElementById('btnLogoutIndex');
+    if (btnLogout) {
+      btnLogout.addEventListener('click', () => {
+        auth.cerrarSesion();
+      });
+    }
+  }
+
+  async function sincronizarEstadoAutenticacion() {
+    const txtRol = document.getElementById('txtUsuarioRol');
+    const dotRol = document.getElementById('dotRol');
+    const btnAdmin = document.getElementById('btnIrAdminPanel');
+    const containerSelectEscuela = document.getElementById('containerSelectEscuela');
+    const inputEscuela = document.getElementById('inputEscuela');
+    const inputCue = document.getElementById('inputCue');
+    const inputLocalidad = document.getElementById('inputLocalidad');
+
+    // Rellenar select de escuelas
+    const escuelas = await auth.cargarEscuelas();
+    if (selectEscuela) {
+      selectEscuela.innerHTML = '<option value="">-- Seleccionar Escuela / CENS --</option>';
+      escuelas.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.id;
+        opt.textContent = `${e.numero} - ${e.nombre} (${e.localidad || ''})`;
+        selectEscuela.appendChild(opt);
+      });
+    }
+
+    if (!auth.currentUser) {
+      // Redirigir al portal de acceso si no hay sesión activa
+      window.location.href = 'login.html';
+      return;
+    }
+
+    if (auth.esAdmin()) {
+      if (txtRol) txtRol.textContent = `👑 Admin: ${auth.currentUser.nombre_completo}`;
+      if (dotRol) dotRol.style.backgroundColor = '#3b82f6';
+      if (btnAdmin) btnAdmin.style.display = 'inline-flex';
+      if (containerSelectEscuela) containerSelectEscuela.style.display = 'block';
+
+      if (inputEscuela) inputEscuela.readOnly = false;
+      if (inputCue) inputCue.readOnly = false;
+      if (inputLocalidad) inputLocalidad.readOnly = false;
+
+    } else if (auth.esEscuela()) {
+      const esc = auth.obtenerEscuelaAsignada();
+      const escNombre = esc ? esc.nombre : auth.currentUser.nombre_completo;
+      
+      if (txtRol) txtRol.textContent = `🏫 ${esc ? esc.numero : 'CENS'}: ${escNombre}`;
+      if (dotRol) dotRol.style.backgroundColor = '#10b981';
+      if (btnAdmin) btnAdmin.style.display = 'none';
+      if (containerSelectEscuela) containerSelectEscuela.style.display = 'none';
+
+      // Fijar datos de la escuela asignada
+      if (esc) {
+        state.escuelaId = esc.id;
+        state.escuelaOrigen = esc.nombre;
+        state.cue = esc.cue || '';
+        state.localidad = esc.localidad || '';
+
+        if (inputEscuela) {
+          inputEscuela.value = esc.nombre;
+          inputEscuela.readOnly = true;
+          inputEscuela.style.backgroundColor = '#f8fafc';
+        }
+        if (inputCue) {
+          inputCue.value = esc.cue || '';
+          inputCue.readOnly = true;
+          inputCue.style.backgroundColor = '#f8fafc';
+        }
+        if (inputLocalidad) {
+          inputLocalidad.value = esc.localidad || '';
+          inputLocalidad.readOnly = true;
+          inputLocalidad.style.backgroundColor = '#f8fafc';
+        }
+      }
+    }
   }
 
   function syncStateFromForm() {
@@ -283,14 +389,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function abrirModalHistorial() {
+  async function abrirModalHistorial() {
     const modal = document.getElementById('modalHistorial');
     const tbody = document.getElementById('tbodyHistorial');
-    const lista = window.driveAPI.obtenerLocales();
+    
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 1.5rem; color: #64748b;">⌛ Cargando registros desde InsForge Cloud...</td></tr>`;
+    modal.classList.add('active');
+
+    const lista = await window.databaseAPI.obtenerHistorialCompleto();
 
     tbody.innerHTML = '';
-    if (lista.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 1.5rem; color: #64748b;">No hay certificados guardados en el historial local.</td></tr>`;
+    if (!lista || lista.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 1.5rem; color: #64748b;">No hay certificados registrados todavía.</td></tr>`;
     } else {
       lista.forEach(c => {
         const tr = document.createElement('tr');
@@ -317,13 +427,19 @@ document.addEventListener('DOMContentLoaded', () => {
             initFormValues();
             renderPreview();
             cerrarModalHistorial();
-            mostrarToast(`Certificado ${id} cargado exitosamente.`);
+            mostrarToast(`Certificado ${id} cargado en el editor.`);
           }
         });
       });
     }
+  }
 
-    modal.classList.add('active');
+  // Botón de exportación a Excel / CSV en el modal
+  const btnExportarExcel = document.getElementById('btnExportarExcel');
+  if (btnExportarExcel) {
+    btnExportarExcel.addEventListener('click', async () => {
+      await window.databaseAPI.exportarAExcelCSV();
+    });
   }
 
   function cerrarModalHistorial() {
@@ -341,4 +457,24 @@ document.addEventListener('DOMContentLoaded', () => {
       toast.classList.remove('show');
     }, 4000);
   }
+
+  // Exponer función global para que el importador de Excel pueda cargar alumnos en el formulario
+  window.cargarAlumnoEnFormulario = (alumno) => {
+    state.nombreApellido = alumno.nombreApellido || '';
+    state.dni = alumno.dni || '';
+    state.localidad = alumno.localidad || '';
+    state.escuelaOrigen = alumno.escuelaOrigen || '';
+    state.cue = alumno.cue || '';
+    state.anoCursado = alumno.anoCursado || '2º';
+    state.ano = alumno.ano || new Date().getFullYear().toString();
+    state.opcionPedagogica = alumno.opcionPedagogica || 'Presencial';
+    state.espaciosAcreditados = Array.isArray(alumno.espaciosAcreditados) ? [...alumno.espaciosAcreditados] : [alumno.espaciosAcreditados];
+    state.fechaInscripcion = alumno.fechaInscripcion || obtenerFechaHoyTexto();
+    state.fechaEmision = alumno.fechaEmision || obtenerFechaHoyTexto();
+    state.idCertificado = alumno.idCertificado || generarIdCertificado();
+
+    initFormValues();
+    renderPreview();
+    mostrarToast(`👤 Datos de ${state.nombreApellido} cargados en el certificado.`);
+  };
 });

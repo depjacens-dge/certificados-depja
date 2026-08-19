@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración y Gestión de Escuelas - DEPJA Mendoza</title>
+  
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/drive-api.js"></script>
+  <style>
+    .admin-container {
+      max-width: 1300px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+    .admin-nav {
+      display: flex;
+      gap: 0.5rem;
+      background: #ffffff;
+      padding: 0.5rem;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .admin-tab-btn {
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .admin-tab-btn.active {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 102, 178, 0.25);
+    }
+    .admin-card {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      box-shadow: var(--shadow-sm);
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body style="background-color: #f1f5f9; min-height: 100vh;">
+
+  <!-- Header Superior -->
+  <header class="app-header">
+    <div class="app-header-brand">
+      <div class="app-logo-box">
+        <img src="img/marca-dge-horizontal.png" alt="Logo DGE Mendoza" class="app-logo-img">
+      </div>
+      <div class="app-title-group">
+        <h1>DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS</h1>
+        <p>Panel de Administración Central — Gestión de Escuelas y Usuarios</p>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <a href="index.html" class="btn btn-outline" style="color: #ffffff; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);">
+        📄 Ir a Emitir Certificados
+      </a>
+      <button type="button" id="btnLogoutAdmin" class="btn btn-outline" style="color: #fca5a5; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">
+        🚪 Cerrar Sesión
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenido Principal Administrativo -->
+  <main class="admin-container" id="adminMainContent">
+    
+    <!-- Barra de Pestañas -->
+    <nav class="admin-nav">
+      <button type="button" class="admin-tab-btn active" data-tab="tab-escuelas">
+        🏫 Escuelas / CENS
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-usuarios">
+        👥 Cuentas de Acceso (Roles)
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-metricas">
+        📊 Métricas e Historial Global
+      </button>
+    </nav>
+
+    <!-- PESTAÑA 1: GESTIÓN DE ESCUELAS -->
+    <section id="tab-escuelas" class="admin-tab-content">
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 style="font-size: 1.2rem; color: #0055a5; font-weight: 700;">Nómina de Escuelas y CENS de Mendoza</h2>
+            <p style="font-size: 0.85rem; color: #64748b;">Configura el número, nombre, CUE y localidad de cada institución.</p>
+          </div>
+          <button type="button" id="btnNuevaEscuela" class="btn btn-primary">
+            + Nueva Escuela / CENS
+          </button>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <input type="text" id="filtroEscuelas" class="form-control" placeholder="🔍 Buscar escuela por número (ej: 3-419), nombre o localidad...">
+        </div>
+
+        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <table class="table-history">
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Nombre Institucional</th>
+                <th>CUE</th>
+                <th>Localidad / Dpto.</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyEscuelas">
+              <!-- Dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTAÑA 2: GESTIÓN DE USUARIOS Y ROLES -->
+    <section id="tab-usuarios" class="admin-tab-content" style="display: none;">
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 style="font-size: 1.2rem; color: #0055a5; font-weight: 700;">Cuentas de Usuarios y Permisos</h2>
+            <p style="font-size: 0.85rem; color: #64748b;">Crea accesos individuales para cada escuela o directivo.</p>
+          </div>
+          <button type="button" id="btnNuevoUsuario" class="btn btn-primary">
+            + Nuevo Usuario / Acceso
+          </button>
+        </div>
+
+        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <table class="table-history">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Nombre / Responsable</th>
+                <th>Rol</th>
+                <th>Escuela Asignada</th>
+                <th>Email Contacto</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyUsuarios">
+              <!-- Dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTAÑA 3: MÉTRICAS E HISTORIAL GLOBAL -->
+    <section id="tab-metricas" class="admin-tab-content" style="display: none;">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #e0f2fe; color: #0369a1;">📜</div>
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a;" id="statTotalCertificados">0</div>
+            <div style="font-size: 0.85rem; color: #64748b;">Certificados Emitidos en Total</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #dcfce7; color: #15803d;">🏫</div>
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a;" id="statTotalEscuelas">0</div>
+            <div style="font-size: 0.85rem; color: #64748b;">Escuelas Registradas</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #fef3c7; color: #b45309;">👥</div>
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a;" id="statTotalUsuarios">0</div>
+            <div style="font-size: 0.85rem; color: #64748b;">Usuarios con Acceso</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+          <h3 style="font-size: 1.1rem; color: #0055a5; font-weight: 700;">Historial Completo Provincial</h3>
+          <button type="button" id="btnExportarGlobalExcel" class="btn btn-success">
+            📥 Descargar Base Global en Excel (.csv)
+          </button>
+        </div>
+
+        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <table class="table-history">
+            <thead>
+              <tr>
+                <th>Código Certificado</th>
+                <th>Estudiante</th>
+                <th>DNI</th>
+                <th>Escuela</th>
+                <th>Fecha Emisión</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyHistorialGlobal">
+              <!-- Dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL CREAR / EDITAR ESCUELA -->
+  <div class="modal-overlay" id="modalEscuelaForm">
+    <div class="modal-card" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3 id="modalEscuelaTitle" style="color: #0055a5; font-size: 1.1rem;">🏫 Cargar Escuela / CENS</h3>
+        <button type="button" class="btn-icon" id="btnCloseModalEscuela">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="formEscuela">
+          <input type="hidden" id="escuelaEditId">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="inputEscuelaNumero">Número de CENS *</label>
+              <input type="text" id="inputEscuelaNumero" class="form-control" placeholder="Ej: 3-419" required>
+            </div>
+            <div class="form-group">
+              <label for="inputEscuelaCue">CUE Institucional</label>
+              <input type="text" id="inputEscuelaCue" class="form-control" placeholder="Ej: 5000419-00">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputEscuelaNombre">Nombre Oficial de la Escuela *</label>
+            <input type="text" id="inputEscuelaNombre" class="form-control" placeholder="Ej: C.E.N.S. Nº 3-419 Juana Azurduy" required>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="inputEscuelaLocalidad">Localidad</label>
+              <input type="text" id="inputEscuelaLocalidad" class="form-control" placeholder="Ej: Godoy Cruz">
+            </div>
+            <div class="form-group">
+              <label for="inputEscuelaDpto">Departamento</label>
+              <input type="text" id="inputEscuelaDpto" class="form-control" placeholder="Ej: Godoy Cruz">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputEscuelaEmail">Correo de Contacto Institucional</label>
+            <input type="email" id="inputEscuelaEmail" class="form-control" placeholder="cens3419@mendoza.edu.ar">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+            Guardar Escuela
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CREAR USUARIO / ROL -->
+  <div class="modal-overlay" id="modalUsuarioForm">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 style="color: #0055a5; font-size: 1.1rem;">👥 Crear Acceso / Usuario</h3>
+        <button type="button" class="btn-icon" id="btnCloseModalUsuario">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="formUsuario">
+          <div class="form-group">
+            <label for="inputUsuarioRol">Tipo de Rol *</label>
+            <select id="inputUsuarioRol" class="form-control" required>
+              <option value="escuela">🏫 Escuela / CENS (Acceso solo a su escuela)</option>
+              <option value="admin">👑 Administrador Central (Acceso total)</option>
+            </select>
+          </div>
+          <div class="form-group" id="groupSelectEscuela">
+            <label for="inputUsuarioEscuela">Escuela Asignada *</label>
+            <select id="inputUsuarioEscuela" class="form-control">
+              <!-- Se llena con las escuelas disponibles -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="inputUsuarioUser">Nombre de Usuario *</label>
+            <input type="text" id="inputUsuarioUser" class="form-control" placeholder="Ej: cens3419" required>
+          </div>
+          <div class="form-group">
+            <label for="inputUsuarioPass">Contraseña / PIN de Acceso *</label>
+            <input type="password" id="inputUsuarioPass" class="form-control" placeholder="Contraseña de acceso..." required>
+          </div>
+          <div class="form-group">
+            <label for="inputUsuarioNombre">Nombre del Responsable / Escuela *</label>
+            <input type="text" id="inputUsuarioNombre" class="form-control" placeholder="Ej: Directivo CENS 3-419" required>
+          </div>
+          <div class="form-group">
+            <label for="inputUsuarioEmail">Correo Electrónico</label>
+            <input type="email" id="inputUsuarioEmail" class="form-control" placeholder="contacto@ejemplo.com">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+            Crear Acceso
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT DE GESTIÓN ADMINISTRATIVA -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const auth = window.authManager;
+      await auth.init();
+
+      const btnLogout = document.getElementById('btnLogoutAdmin');
+
+      // Verificar si está logueado como Administrador, sino redirigir a login.html
+      if (!auth.esAdmin()) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      cargarDatosPanel();
+
+      btnLogout.addEventListener('click', () => {
+        auth.cerrarSesion();
+      });
+      });
+
+      // Navegación entre pestañas
+      document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
+
+          btn.classList.add('active');
+          const tabId = btn.getAttribute('data-tab');
+          document.getElementById(tabId).style.display = 'block';
+        });
+      });
+
+      // Lógica de Escuelas
+      const tbodyEscuelas = document.getElementById('tbodyEscuelas');
+      const modalEscuela = document.getElementById('modalEscuelaForm');
+      const formEscuela = document.getElementById('formEscuela');
+
+      document.getElementById('btnNuevaEscuela').addEventListener('click', () => {
+        document.getElementById('escuelaEditId').value = '';
+        formEscuela.reset();
+        document.getElementById('modalEscuelaTitle').textContent = '🏫 Nueva Escuela / CENS';
+        modalEscuela.classList.add('active');
+      });
+
+      document.getElementById('btnCloseModalEscuela').addEventListener('click', () => {
+        modalEscuela.classList.remove('active');
+      });
+
+      formEscuela.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          id: document.getElementById('escuelaEditId').value || `cens-${document.getElementById('inputEscuelaNumero').value.replace(/[^0-9-]/g, '')}`,
+          numero: document.getElementById('inputEscuelaNumero').value,
+          nombre: document.getElementById('inputEscuelaNombre').value,
+          cue: document.getElementById('inputEscuelaCue').value,
+          localidad: document.getElementById('inputEscuelaLocalidad').value,
+          departamento: document.getElementById('inputEscuelaDpto').value,
+          email_contacto: document.getElementById('inputEscuelaEmail').value,
+          activa: true
+        };
+
+        try {
+          await auth.guardarEscuela(data);
+          modalEscuela.classList.remove('active');
+          alert('Escuela guardada exitosamente.');
+          await renderTablaEscuelas();
+        } catch(err) {
+          alert('Error: ' + err.message);
+        }
+      });
+
+      // Lógica de Usuarios / Accesos
+      const modalUsuario = document.getElementById('modalUsuarioForm');
+      const formUsuario = document.getElementById('formUsuario');
+      const selectRol = document.getElementById('inputUsuarioRol');
+      const groupSelectEscuela = document.getElementById('groupSelectEscuela');
+
+      selectRol.addEventListener('change', () => {
+        groupSelectEscuela.style.display = selectRol.value === 'admin' ? 'none' : 'block';
+      });
+
+      document.getElementById('btnNuevoUsuario').addEventListener('click', async () => {
+        formUsuario.reset();
+        await rellenarSelectEscuelas();
+        modalUsuario.classList.add('active');
+      });
+
+      document.getElementById('btnCloseModalUsuario').addEventListener('click', () => {
+        modalUsuario.classList.remove('active');
+      });
+
+      formUsuario.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          usuario: document.getElementById('inputUsuarioUser').value,
+          password: document.getElementById('inputUsuarioPass').value,
+          nombre_completo: document.getElementById('inputUsuarioNombre').value,
+          email: document.getElementById('inputUsuarioEmail').value,
+          rol: document.getElementById('inputUsuarioRol').value,
+          escuela_id: document.getElementById('inputUsuarioEscuela').value
+        };
+
+        try {
+          await auth.guardarUsuario(data);
+          modalUsuario.classList.remove('active');
+          alert('Acceso creado exitosamente.');
+          await renderTablaUsuarios();
+        } catch(err) {
+          alert('Error: ' + err.message);
+        }
+      });
+
+      // Exportar global en Excel
+      document.getElementById('btnExportarGlobalExcel').addEventListener('click', async () => {
+        await window.databaseAPI.exportarAExcelCSV();
+      });
+
+      async function cargarDatosPanel() {
+        await renderTablaEscuelas();
+        await renderTablaUsuarios();
+        await renderMetricas();
+      }
+
+      async function renderTablaEscuelas() {
+        const escuelas = await auth.cargarEscuelas();
+        tbodyEscuelas.innerHTML = '';
+        
+        escuelas.forEach(esc => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${esc.numero}</strong></td>
+            <td>${esc.nombre}</td>
+            <td>${esc.cue || 'N/A'}</td>
+            <td>${esc.localidad || 'N/A'}</td>
+            <td><span style="background: #dcfce7; color: #15803d; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">Activa</span></td>
+            <td>
+              <button class="btn btn-outline btn-editar-escuela" data-id="${esc.id}" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                ✏️ Editar
+              </button>
+            </td>
+          `;
+          tbodyEscuelas.appendChild(tr);
+        });
+
+        tbodyEscuelas.querySelectorAll('.btn-editar-escuela').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            const esc = escuelas.find(x => x.id === id);
+            if (esc) {
+              document.getElementById('escuelaEditId').value = esc.id;
+              document.getElementById('inputEscuelaNumero').value = esc.numero;
+              document.getElementById('inputEscuelaNombre').value = esc.nombre;
+              document.getElementById('inputEscuelaCue').value = esc.cue || '';
+              document.getElementById('inputEscuelaLocalidad').value = esc.localidad || '';
+              document.getElementById('inputEscuelaDpto').value = esc.departamento || '';
+              document.getElementById('inputEscuelaEmail').value = esc.email_contacto || '';
+              document.getElementById('modalEscuelaTitle').textContent = '✏️ Editar Escuela ' + esc.numero;
+              modalEscuela.classList.add('active');
+            }
+          });
+        });
+      }
+
+      async function rellenarSelectEscuelas() {
+        const escuelas = await auth.cargarEscuelas();
+        const select = document.getElementById('inputUsuarioEscuela');
+        select.innerHTML = '';
+        escuelas.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e.id;
+          opt.textContent = `${e.numero} - ${e.nombre} (${e.localidad || ''})`;
+          select.appendChild(opt);
+        });
+      }
+
+      async function renderTablaUsuarios() {
+        const usuarios = await auth.obtenerTodosLosUsuarios();
+        const escuelas = await auth.cargarEscuelas();
+        const tbody = document.getElementById('tbodyUsuarios');
+        tbody.innerHTML = '';
+
+        usuarios.forEach(u => {
+          const esc = escuelas.find(e => e.id === u.escuela_id);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${u.usuario}</strong></td>
+            <td>${u.nombre_completo}</td>
+            <td><span style="font-weight: 700; color: ${u.rol === 'admin' ? '#0055a5' : '#047857'}">${u.rol === 'admin' ? '👑 Administrador' : '🏫 Escuela'}</span></td>
+            <td>${esc ? `${esc.numero} (${esc.nombre})` : 'Todas (Global)'}</td>
+            <td>${u.email || '-'}</td>
+            <td><span style="background: #dcfce7; color: #15803d; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">Activo</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function renderMetricas() {
+        const certificados = await window.databaseAPI.obtenerHistorialCompleto();
+        const escuelas = await auth.cargarEscuelas();
+        const usuarios = await auth.obtenerTodosLosUsuarios();
+
+        document.getElementById('statTotalCertificados').textContent = certificados.length;
+        document.getElementById('statTotalEscuelas').textContent = escuelas.length;
+        document.getElementById('statTotalUsuarios').textContent = usuarios.length;
+
+        const tbody = document.getElementById('tbodyHistorialGlobal');
+        tbody.innerHTML = '';
+        certificados.slice(0, 50).forEach(c => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${c.idCertificado}</strong></td>
+            <td>${c.nombreApellido}</td>
+            <td>${c.dni}</td>
+            <td>${c.escuelaOrigen || 'N/A'}</td>
+            <td>${c.fechaEmision || ''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+    });
+  </script>
+</body>
+</html>

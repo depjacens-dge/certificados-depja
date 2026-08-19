@@ -22,26 +22,33 @@ const CONFIG = {
   subtituloConvenio: 'CONVENIO SEGURIDAD PRIVADA - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS',
 
   // ==========================================
-  // 2. ENLACE Y SERVIDOR DE BASE DE DATOS (GOOGLE DRIVE / SHEETS)
+  // 2. BASE DE DATOS EN LA NUBE (INSFORGE POSTGRESQL)
   // ==========================================
-  // Pega aquí la URL de la WebApp desplegada en Google Apps Script
-  // Ejemplo: 'https://script.google.com/macros/s/AKfycbx.../exec'
+  insforge: {
+    baseUrl: 'https://44t68c5e.us-east.insforge.app',
+    anonKey: 'anon_8f4f89d0ee4d18215ac544fd1126bbfb3d74ce02399290ffb8cc6e519a3ceccb',
+    tabla: 'certificados'
+  },
+
+  // ==========================================
+  // 3. RESPALDO OPCIONAL (GOOGLE DRIVE / SHEETS)
+  // ==========================================
+  // URL opcional de WebApp desplegada en Google Apps Script
   googleAppsScriptUrl: '', 
 
   // ==========================================
-  // 3. DOMINIO WEB ALOJADO (GITHUB PAGES / VERCEL / SERVIDOR PROPIO)
+  // 4. DOMINIO WEB ALOJADO (GITHUB PAGES / VERCEL / SERVIDOR PROPIO)
   // ==========================================
   // Se detecta automáticamente en GitHub Pages (ej: https://2008-tdh.github.io/certificados-depja)
   appBaseUrl: getAutoBaseUrl(), 
 
   // ==========================================
-  // 4. MODO DE FUNCIONAMIENTO
+  // 5. MODO DE FUNCIONAMIENTO
   // ==========================================
-  // true = Permite probar la app localmente guardando en localStorage si no hay conexión con Google Drive.
-  modoPruebasLocal: true,
+  modoPruebasLocal: false,
 
   // Versión del Sistema
-  version: '1.0.0'
+  version: '1.1.0'
 };
 
 // Exportar para uso global en el navegador
