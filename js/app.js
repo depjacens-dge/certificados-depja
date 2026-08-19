@@ -173,18 +173,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnLimpiar.addEventListener('click', () => {
       state.nombreApellido = '';
       state.dni = '';
-      state.localidad = '';
-      state.escuelaOrigen = '';
-      state.cue = '';
       state.anoCursado = '1º';
       state.opcionPedagogica = 'Presencial';
       state.espaciosAcreditados = [''];
       state.firmaImagenDataUrl = null;
       if (inputFirmaImg) inputFirmaImg.value = '';
       state.idCertificado = generarIdCertificado();
+
+      const escAsignada = auth.obtenerEscuelaAsignada ? auth.obtenerEscuelaAsignada() : null;
+      if (escAsignada) {
+        state.escuelaId = escAsignada.id;
+        state.escuelaOrigen = escAsignada.nombre;
+        state.cue = escAsignada.cue || '';
+        state.localidad = escAsignada.localidad || 'Mendoza';
+      } else {
+        state.localidad = '';
+        state.escuelaOrigen = '';
+        state.cue = '';
+      }
+
       initFormValues();
       renderPreview();
-      mostrarToast('Formulario restablecido para un nuevo certificado.');
+      document.getElementById('inputNombre').focus();
+      mostrarToast('Formulario limpio listo para cargar un Alumno Nuevo.');
     });
 
     // Evento del selector de escuelas registradas
@@ -257,7 +268,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
           modalPadron.classList.add('active');
         } else {
-          alert(`No se encontró ningún alumno con el DNI "${dniVal}" en el padrón registrado.`);
+          const deseaCrear = confirm(`El DNI "${dniVal}" no fue encontrado en el padrón general precargado.\n\n¿Desea dar de alta y cargar este alumno como un NUEVO ESTUDIANTE para su escuela?`);
+          if (deseaCrear) {
+            state.nombreApellido = '';
+            state.dni = dniVal;
+            state.idCertificado = generarIdCertificado();
+            state.espaciosAcreditados = [''];
+            
+            const escAsignada = auth.obtenerEscuelaAsignada ? auth.obtenerEscuelaAsignada() : null;
+            if (escAsignada) {
+              state.escuelaId = escAsignada.id;
+              state.escuelaOrigen = escAsignada.nombre;
+              state.cue = escAsignada.cue || '';
+              state.localidad = escAsignada.localidad || 'Mendoza';
+            }
+
+            initFormValues();
+            renderPreview();
+            document.getElementById('inputNombre').focus();
+            mostrarToast(`Formulario preparado para registrar al nuevo alumno.`);
+          }
         }
       } catch (err) {
         console.error('Error buscando en padrón:', err);
