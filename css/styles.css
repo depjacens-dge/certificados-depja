@@ -1,14 +1,23 @@
 /* ==========================================================================
    SISTEMA DE CERTIFICADOS DEPJA - CONVENIO SEGURIDAD PRIVADA (MENDOZA)
-   ESTILOS DE INTERFAZ Y HOJA OFICIAL FIEL AL DISEÑO INSTITUCIONAL DGE
+   ESTILOS DE INTERFAZ Y HOJA OFICIAL FIEL AL MANUAL DE NORMAS DE MARCA DGE
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=REM:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Roboto:wght@400;500;700&display=swap');
 
 :root {
-  --primary: #0066b2;
-  --primary-hover: #004d88;
-  --banner-blue: #00a6e0;
+  /* PALETA OFICIAL MANUAL DE NORMAS DGE MENDOZA (ETAPA 1) */
+  --dge-blue: #000f9f;       /* Pantone Blue 072 - Bridgeport */
+  --dge-blue-hover: #000b73;
+  --dge-cyan: #3cb4e5;       /* Pantone 298 C - Flyway */
+  --dge-cyan-hover: #299ece;
+  --dge-gold: #c8a977;       /* Pantone 466 C - Vintage Gold */
+  
+  --primary: var(--dge-blue);
+  --primary-hover: var(--dge-blue-hover);
+  --banner-blue: var(--dge-cyan);
+  --accent-gold: var(--dge-gold);
+  
   --text-dark: #1e293b;
   --bg-app: #f1f5f9;
   --card-bg: #ffffff;
@@ -24,7 +33,7 @@
 }
 
 body {
-  font-family: 'Roboto', 'Inter', system-ui, sans-serif;
+  font-family: 'REM', 'Roboto', system-ui, sans-serif;
   background-color: var(--bg-app);
   color: var(--text-dark);
   min-height: 100vh;
@@ -34,13 +43,14 @@ body {
 
 /* Header de la Aplicación Web */
 .app-header {
-  background: linear-gradient(135deg, #0055a5 0%, #0f172a 100%);
+  background: linear-gradient(135deg, var(--dge-blue) 0%, #00084d 100%);
   color: #ffffff;
   padding: 1.1rem 2rem;
   box-shadow: var(--shadow-sm);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 3px solid var(--dge-gold);
 }
 
 .app-header-brand {
@@ -327,7 +337,7 @@ body {
   flex-direction: column;
   justify-content: space-between;
   border: 1px solid #d1d5db;
-  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  font-family: 'REM', 'Roboto', Arial, Helvetica, sans-serif;
   overflow: hidden;
 }
 
@@ -342,7 +352,7 @@ body {
 .cert-header-dept {
   font-size: 11pt;
   font-weight: 700;
-  color: #0055a5;
+  color: var(--dge-blue);
   line-height: 1.25;
   width: 65%;
   text-transform: uppercase;
@@ -366,7 +376,7 @@ body {
   text-align: center;
   font-size: 14pt;
   font-weight: 800;
-  color: #0055a5;
+  color: var(--dge-blue);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.35rem;
@@ -381,9 +391,9 @@ body {
   margin-bottom: 1.2rem;
 }
 
-/* Banners Celestes de Sección */
+/* Banners Celestes de Sección Oficial DGE (Pantone 298 C) */
 .cert-banner-header {
-  background-color: #00a6e0;
+  background-color: var(--dge-cyan);
   color: #ffffff;
   font-weight: 800;
   font-size: 11pt;
