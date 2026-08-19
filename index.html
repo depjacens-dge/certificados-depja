@@ -54,6 +54,19 @@
 
       <form id="certForm">
         
+        <!-- Barra de Búsqueda Rápida en Padrón General por DNI -->
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid #bae6fd; margin-bottom: 1.25rem;">
+          <label for="inputBuscarDniPadron" style="font-size: 0.825rem; font-weight: 700; color: #0369a1; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+            <span>🔍</span> Buscar y Asignar Alumno del Padrón General (por DNI)
+          </label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="inputBuscarDniPadron" class="form-control" placeholder="Ingrese número de DNI del alumno..." style="font-weight: 600; background: #ffffff;">
+            <button type="button" id="btnBuscarPadronDni" class="btn btn-primary" style="white-space: nowrap; font-size: 0.85rem; padding: 0.45rem 1rem;">
+              Buscar
+            </button>
+          </div>
+        </div>
+
         <!-- Nombre, DNI, Localidad -->
         <div class="form-group">
           <label for="inputNombre">Nombre y Apellido *</label>
@@ -427,6 +440,49 @@
           </table>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMACIÓN DE ASIGNACIÓN DESDE PADRÓN -->
+  <div class="modal-overlay" id="modalAsignarPadron">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 style="color: #0369a1; font-size: 1.15rem; margin: 0;">📋 Alumno Encontrado en el Padrón General</h3>
+        <button type="button" class="btn-icon" id="btnCloseModalPadron">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+          <div style="font-size: 0.8rem; color: #64748b;">Estudiante:</div>
+          <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;" id="padronNombre">Cargando...</div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem;">
+            <div>
+              <div style="font-size: 0.8rem; color: #64748b;">DNI:</div>
+              <div style="font-weight: 700; color: #334155;" id="padronDni">-</div>
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; color: #64748b;">Estado en Padrón:</div>
+              <div style="font-weight: 700; color: #b45309;" id="padronEstado">Sin Asignar</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e2e8f0;">
+            <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.25rem;">Materias Acreditadas:</div>
+            <div style="font-size: 0.85rem; color: #0369a1; font-weight: 600;" id="padronMaterias">-</div>
+          </div>
+        </div>
+
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.875rem; color: #065f46;">
+          ¿Desea asignar a este alumno a su institución (<strong id="padronNombreEscuelaDestino">CENS</strong>) y cargar sus datos en el certificado?
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" class="btn btn-outline" id="btnCancelarAsignacionPadron">Cancelar</button>
+          <button type="button" class="btn btn-success" id="btnConfirmarAsignacionPadron" style="font-weight: 700;">
+            ✅ Sí, Asignar a mi Escuela y Cargar Datos
+          </button>
+        </div>
       </div>
     </div>
   </div>

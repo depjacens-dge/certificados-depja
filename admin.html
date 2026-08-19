@@ -683,6 +683,7 @@
 
           // Vincular con escuela registrada si coincide
           let escuelaId = null;
+          let estadoAlumno = 'Sin Asignar (Disponible en Padrón)';
           if (escuelaOrigen) {
             const match = escuelas.find(e => 
               escuelaOrigen.toLowerCase().includes(e.numero.toLowerCase()) || 
@@ -693,10 +694,13 @@
               escuelaOrigen = match.nombre;
               if (!cue) cue = match.cue || '';
               if (!localidad || localidad === 'Mendoza') localidad = match.localidad || 'Mendoza';
+              estadoAlumno = `Asignado a ${match.numero}`;
             }
+          } else {
+            escuelaOrigen = 'Pendiente de Asignación';
+            cue = '';
           }
 
-          if (!escuelaOrigen) escuelaOrigen = 'C.E.N.S. Nº 3-415';
           if (espacios.length === 0) espacios = ['Lengua y Literatura I (Aprobado)', 'Matemática I (Aprobado)'];
 
           return {
@@ -709,11 +713,11 @@
             localidad: localidad,
             anoCursado: anoCursado,
             ano: new Date().getFullYear().toString(),
-            opcionPedagogica: 'Presencial',
+            opcionPedagogica: opcionPedagogica || 'Presencial',
             espaciosAcreditados: espacios,
             fechaInscripcion: new Date().toLocaleDateString('es-AR'),
             fechaEmision: new Date().toLocaleDateString('es-AR'),
-            estado: 'Pendiente de Alta'
+            estado: estadoAlumno
           };
         }).filter(a => a.nombreApellido && a.nombreApellido.trim() !== '');
       }
@@ -733,14 +737,19 @@
         }
 
         filtrados.forEach(a => {
+          const esPendiente = !a.escuelaId || a.escuelaOrigen === 'Pendiente de Asignación';
+          const badgeEscuela = esPendiente 
+            ? `<span style="background: #fef3c7; color: #b45309; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">🟡 Sin Asignar (Padrón)</span>`
+            : `<span style="font-weight: 600; color: #0055a5;">${a.escuelaOrigen}</span>`;
+
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><code>${a.idCertificado}</code></td>
             <td><strong>${a.nombreApellido}</strong></td>
             <td>${a.dni}</td>
-            <td>${a.escuelaOrigen}</td>
+            <td>${badgeEscuela}</td>
             <td><small>${a.espaciosAcreditados.slice(0, 2).join(', ')}${a.espaciosAcreditados.length > 2 ? '...' : ''}</small></td>
-            <td><span style="background: ${a.estado.includes('Registrado') ? '#dcfce7' : '#fef3c7'}; color: ${a.estado.includes('Registrado') ? '#15803d' : '#b45309'}; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">${a.estado}</span></td>
+            <td><span style="background: ${a.estado.includes('Registrado') ? '#dcfce7' : '#f1f5f9'}; color: ${a.estado.includes('Registrado') ? '#15803d' : '#475569'}; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">${a.estado}</span></td>
           `;
           tbodyExcelAdmin.appendChild(tr);
         });

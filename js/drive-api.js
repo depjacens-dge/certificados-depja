@@ -118,19 +118,28 @@ class DatabaseAPI {
       }
     }
 
-    if (guardadoEnInsforge) {
-      return {
-        exito: true,
-        destino: 'InsForge Cloud & Local',
-        mensaje: '✅ Certificado registrado exitosamente en la Base de Datos (InsForge Cloud).'
-      };
-    } else {
-      return {
-        exito: true,
-        destino: 'Local Storage',
-        mensaje: '⚠️ Certificado guardado en respaldo local (Sin conexión a InsForge).'
-      };
+  // Actualizar un certificado existente en InsForge Cloud (ej: al asignar a una escuela)
+  async actualizarCertificadoEnInsforge(idCertificado, camposActualizados) {
+    const config = window.CONFIG || {};
+    if (config.insforge && config.insforge.baseUrl && config.insforge.anonKey) {
+      try {
+        const tabla = config.insforge.tabla || 'certificados';
+        const url = `${config.insforge.baseUrl}/api/database/records/${tabla}?id_certificado=eq.${encodeURIComponent(idCertificado)}`;
+        
+        const res = await fetch(url, {
+          method: 'PATCH',
+          headers: this.getInsforgeHeaders(),
+          body: JSON.stringify(camposActualizados)
+        });
+
+        if (res.ok) {
+          return { exito: true, mensaje: 'Certificado actualizado exitosamente en InsForge Cloud.' };
+        }
+      } catch (err) {
+        console.warn('Error al actualizar en InsForge:', err);
+      }
     }
+    return { exito: false, mensaje: 'No se pudo actualizar en la base de datos.' };
   }
 
   // Buscar certificado por ID de Certificado o por DNI (Búsqueda instantánea en InsForge)
@@ -158,7 +167,7 @@ class DatabaseAPI {
           }
         }
 
-        // Si no encontró por ID, buscar por DNI
+        // Si no encontró por ID, buscar por DNI directo
         url = `${config.insforge.baseUrl}/api/database/records/${tabla}?dni=eq.${encodeURIComponent(busqueda)}`;
         res = await fetch(url, { headers: this.getInsforgeHeaders() });
         
@@ -166,6 +175,19 @@ class DatabaseAPI {
           let rows = await res.json();
           if (rows && rows.length > 0) {
             return { encontrado: true, fuente: 'InsForge Cloud Database (Oficial)', data: this.formatearDesdeInsforge(rows[0]) };
+          }
+        }
+
+        // Probar también buscando sin puntos (ej: 38452891)
+        const cleanDni = busqueda.replace(/\D/g, '');
+        if (cleanDni && cleanDni !== busqueda) {
+          url = `${config.insforge.baseUrl}/api/database/records/${tabla}?dni=eq.${encodeURIComponent(cleanDni)}`;
+          res = await fetch(url, { headers: this.getInsforgeHeaders() });
+          if (res.ok) {
+            let rows = await res.json();
+            if (rows && rows.length > 0) {
+              return { encontrado: true, fuente: 'InsForge Cloud Database (Oficial)', data: this.formatearDesdeInsforge(rows[0]) };
+            }
           }
         }
       } catch (err) {

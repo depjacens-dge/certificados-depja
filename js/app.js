@@ -214,6 +214,112 @@ document.addEventListener('DOMContentLoaded', async () => {
         auth.cerrarSesion();
       });
     }
+
+    // ==========================================
+    // BÚSQUEDA Y ASIGNACIÓN DESDE PADRÓN GENERAL
+    // ==========================================
+    const inputBuscarDniPadron = document.getElementById('inputBuscarDniPadron');
+    const btnBuscarPadronDni = document.getElementById('btnBuscarPadronDni');
+    const modalPadron = document.getElementById('modalAsignarPadron');
+    const btnCloseModalPadron = document.getElementById('btnCloseModalPadron');
+    const btnCancelarPadron = document.getElementById('btnCancelarAsignacionPadron');
+    const btnConfirmarPadron = document.getElementById('btnConfirmarAsignacionPadron');
+
+    let alumnoEncontradoPadron = null;
+
+    async function buscarEnPadronPorDni() {
+      const dniVal = (inputBuscarDniPadron?.value || '').trim();
+      if (!dniVal) {
+        alert('Por favor ingrese un número de DNI para buscar.');
+        return;
+      }
+
+      btnBuscarPadronDni.disabled = true;
+      btnBuscarPadronDni.textContent = '⌛ Buscando...';
+
+      try {
+        const resultado = await window.databaseAPI.buscarCertificado(dniVal);
+        if (resultado && resultado.encontrado && resultado.data) {
+          alumnoEncontradoPadron = resultado.data;
+          
+          document.getElementById('padronNombre').textContent = alumnoEncontradoPadron.nombreApellido;
+          document.getElementById('padronDni').textContent = alumnoEncontradoPadron.dni;
+          document.getElementById('padronEstado').textContent = alumnoEncontradoPadron.escuelaOrigen || '🟡 Sin Asignar (Padrón General)';
+          
+          const materias = Array.isArray(alumnoEncontradoPadron.espaciosAcreditados) 
+            ? alumnoEncontradoPadron.espaciosAcreditados.join(' • ')
+            : (alumnoEncontradoPadron.espaciosAcreditados || 'Materias del plan');
+          document.getElementById('padronMaterias').textContent = materias;
+
+          const escAsignada = auth.obtenerEscuelaAsignada ? auth.obtenerEscuelaAsignada() : null;
+          const destinoTexto = escAsignada ? escAsignada.nombre : (state.escuelaOrigen || 'su institución');
+          document.getElementById('padronNombreEscuelaDestino').textContent = destinoTexto;
+
+          modalPadron.classList.add('active');
+        } else {
+          alert(`No se encontró ningún alumno con el DNI "${dniVal}" en el padrón registrado.`);
+        }
+      } catch (err) {
+        console.error('Error buscando en padrón:', err);
+        alert('Error al consultar el padrón en la base de datos.');
+      } finally {
+        btnBuscarPadronDni.disabled = false;
+        btnBuscarPadronDni.textContent = 'Buscar';
+      }
+    }
+
+    if (btnBuscarPadronDni) {
+      btnBuscarPadronDni.addEventListener('click', buscarEnPadronPorDni);
+    }
+
+    if (inputBuscarDniPadron) {
+      inputBuscarDniPadron.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          buscarEnPadronPorDni();
+        }
+      });
+    }
+
+    if (btnCloseModalPadron) {
+      btnCloseModalPadron.addEventListener('click', () => modalPadron.classList.remove('active'));
+    }
+
+    if (btnCancelarPadron) {
+      btnCancelarPadron.addEventListener('click', () => modalPadron.classList.remove('active'));
+    }
+
+    if (btnConfirmarPadron) {
+      btnConfirmarPadron.addEventListener('click', () => {
+        if (!alumnoEncontradoPadron) return;
+
+        // Cargar datos en el estado y formulario
+        state.nombreApellido = alumnoEncontradoPadron.nombreApellido;
+        state.dni = alumnoEncontradoPadron.dni;
+        state.idCertificado = alumnoEncontradoPadron.idCertificado || generarIdCertificado();
+        
+        if (alumnoEncontradoPadron.espaciosAcreditados && alumnoEncontradoPadron.espaciosAcreditados.length > 0) {
+          state.espaciosAcreditados = Array.isArray(alumnoEncontradoPadron.espaciosAcreditados)
+            ? [...alumnoEncontradoPadron.espaciosAcreditados]
+            : [alumnoEncontradoPadron.espaciosAcreditados];
+        }
+
+        // Fijar datos de la escuela del usuario actual si está logueado como CENS
+        const escAsignada = auth.obtenerEscuelaAsignada ? auth.obtenerEscuelaAsignada() : null;
+        if (escAsignada) {
+          state.escuelaId = escAsignada.id;
+          state.escuelaOrigen = escAsignada.nombre;
+          state.cue = escAsignada.cue || '';
+          state.localidad = escAsignada.localidad || 'Mendoza';
+        }
+
+        initFormValues();
+        renderPreview();
+
+        modalPadron.classList.remove('active');
+        mostrarToast(`✅ Alumno ${state.nombreApellido} asignado a ${state.escuelaOrigen}.`);
+      });
+    }
   }
 
   async function sincronizarEstadoAutenticacion() {
