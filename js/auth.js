@@ -220,6 +220,7 @@ class AuthManager {
       departamento: escuelaData.departamento || '',
       direccion: escuelaData.direccion || '',
       email_contacto: escuelaData.email_contacto || '',
+      telefono: escuelaData.telefono || '',
       firma_url: escuelaData.firma_url || null,
       activa: escuelaData.activa !== false
     }];

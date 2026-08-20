@@ -340,9 +340,15 @@
               <input type="text" id="inputEscuelaDpto" class="form-control" placeholder="Ej: Godoy Cruz">
             </div>
           </div>
-          <div class="form-group">
-            <label for="inputEscuelaEmail">Correo de Contacto Institucional</label>
-            <input type="email" id="inputEscuelaEmail" class="form-control" placeholder="cens3419@mendoza.edu.ar">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="inputEscuelaEmail">Correo Electrónico Institucional</label>
+              <input type="email" id="inputEscuelaEmail" class="form-control" placeholder="cens3419@mendoza.edu.ar">
+            </div>
+            <div class="form-group">
+              <label for="inputEscuelaTelefono">Teléfono / WhatsApp Institucional</label>
+              <input type="text" id="inputEscuelaTelefono" class="form-control" placeholder="Ej: 261 423 4567">
+            </div>
           </div>
           <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
             Guardar Escuela
@@ -460,6 +466,7 @@
             localidad: document.getElementById('inputEscuelaLocalidad').value,
             departamento: document.getElementById('inputEscuelaDpto').value,
             email_contacto: document.getElementById('inputEscuelaEmail').value,
+            telefono: document.getElementById('inputEscuelaTelefono').value,
             activa: true
           };
 
@@ -969,6 +976,7 @@
               document.getElementById('inputEscuelaLocalidad').value = esc.localidad || '';
               document.getElementById('inputEscuelaDpto').value = esc.departamento || '';
               document.getElementById('inputEscuelaEmail').value = esc.email_contacto || '';
+              document.getElementById('inputEscuelaTelefono').value = esc.telefono || '';
               document.getElementById('modalEscuelaTitle').textContent = '✏️ Editar Escuela ' + esc.numero;
               if (modalEscuela) modalEscuela.classList.add('active');
             }

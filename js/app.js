@@ -168,6 +168,79 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     });
 
+    // Enviar Certificado Digital por WhatsApp
+    const btnEnviarWhatsapp = document.getElementById('btnEnviarWhatsapp');
+    if (btnEnviarWhatsapp) {
+      btnEnviarWhatsapp.addEventListener('click', async () => {
+        syncStateFromForm();
+        if (!state.nombreApellido || !state.dni) {
+          alert('Por favor complete los datos del alumno antes de enviar.');
+          return;
+        }
+
+        await window.databaseAPI.guardarCertificado(state);
+
+        const celInput = document.getElementById('inputCelularAlumno')?.value || '';
+        let celLimpio = celInput.replace(/[^0-9]/g, '');
+
+        if (!celLimpio) {
+          const celPrompt = prompt('Ingrese el número de celular del alumno para enviar por WhatsApp:\n(Ej: 261 555 1234)', '');
+          if (!celPrompt) return;
+          celLimpio = celPrompt.replace(/[^0-9]/g, '');
+        }
+
+        if (celLimpio.length === 10) {
+          celLimpio = '549' + celLimpio;
+        } else if (celLimpio.length === 8) {
+          celLimpio = '549261' + celLimpio;
+        }
+
+        const config = window.CONFIG || {};
+        const baseUrl = config.appBaseUrl || window.location.origin;
+        const urlValidacion = `${baseUrl}/validar.html?id=${encodeURIComponent(state.idCertificado)}`;
+
+        const mensajeTexto = `Hola *${state.nombreApellido}*, la Dirección General de Escuelas (DEPJA Mendoza) y tu escuela *${state.escuelaOrigen || 'C.E.N.S.'}* te envían tu *Certificado Oficial de Estudios Incompletos Secundarios* (Convenio Seguridad Privada).\n\n📜 *Código Único Oficial:* ${state.idCertificado}\n🆔 *DNI:* ${state.dni}\n🏫 *Escuela:* ${state.escuelaOrigen}\n\n🔗 *Puedes ver y validar tu certificado oficial aquí:*\n${urlValidacion}\n\n_Documento oficial digital emitido por DGE Mendoza._`;
+
+        const waUrl = `https://wa.me/${celLimpio}?text=${encodeURIComponent(mensajeTexto)}`;
+        window.open(waUrl, '_blank');
+        mostrarToast(`Abriendo WhatsApp con el certificado de ${state.nombreApellido}...`);
+      });
+    }
+
+    // Enviar Certificado Digital por Correo
+    const btnEnviarEmail = document.getElementById('btnEnviarEmail');
+    if (btnEnviarEmail) {
+      btnEnviarEmail.addEventListener('click', async () => {
+        syncStateFromForm();
+        if (!state.nombreApellido || !state.dni) {
+          alert('Por favor complete los datos del alumno antes de enviar.');
+          return;
+        }
+
+        await window.databaseAPI.guardarCertificado(state);
+
+        const emailInput = document.getElementById('inputEmailAlumno')?.value || '';
+        let emailDestino = emailInput.trim();
+
+        if (!emailDestino) {
+          const emailPrompt = prompt('Ingrese el correo electrónico del alumno para enviar:', '');
+          if (!emailPrompt) return;
+          emailDestino = emailPrompt.trim();
+        }
+
+        const config = window.CONFIG || {};
+        const baseUrl = config.appBaseUrl || window.location.origin;
+        const urlValidacion = `${baseUrl}/validar.html?id=${encodeURIComponent(state.idCertificado)}`;
+
+        const asunto = `Certificado Oficial de Estudios Incompletos - ${state.nombreApellido} (DEPJA Mendoza)`;
+        const cuerpo = `Estimado/a ${state.nombreApellido},\n\nLe enviamos su Certificado Oficial de Estudios Incompletos Secundarios (Convenio Seguridad Privada - DGE Mendoza).\n\nCódigo de Verificación: ${state.idCertificado}\nDNI: ${state.dni}\nEscuela: ${state.escuelaOrigen}\n\nPuede consultar y verificar la autenticidad de su documento en el Portal Oficial de Validación:\n${urlValidacion}\n\nAtentamente,\nDirección de Educación Permanente de Jóvenes y Adultos (DEPJA)\nGobierno de Mendoza`;
+
+        const mailtoUrl = `mailto:${encodeURIComponent(emailDestino)}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+        window.location.href = mailtoUrl;
+        mostrarToast(`Abriendo cliente de correo para ${emailDestino}...`);
+      });
+    }
+
     btnVerHistorial.addEventListener('click', abrirModalHistorial);
 
     btnLimpiar.addEventListener('click', () => {
