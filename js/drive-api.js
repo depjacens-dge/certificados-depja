@@ -118,6 +118,13 @@ class DatabaseAPI {
       }
     }
 
+    return {
+      exito: true,
+      guardadoEnInsforge,
+      mensaje: mensajeInsforge || 'Certificado procesado y guardado en almacenamiento seguro.'
+    };
+  }
+
   // Actualizar un certificado existente en InsForge Cloud (ej: al asignar a una escuela)
   async actualizarCertificadoEnInsforge(idCertificado, camposActualizados) {
     const config = window.CONFIG || {};
