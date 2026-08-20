@@ -155,8 +155,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     btnGuardarDrive.addEventListener('click', async () => {
+      syncStateFromForm();
+      if (!state.nombreApellido || !state.dni) {
+        alert('Por favor ingrese al menos el Nombre y DNI del alumno antes de guardar.');
+        return;
+      }
+
       btnGuardarDrive.disabled = true;
-      btnGuardarDrive.innerHTML = `⌛ Guardando en InsForge...`;
+      btnGuardarDrive.innerHTML = `⌛ Guardando...`;
 
       const res = await window.databaseAPI.guardarCertificado(state);
       
@@ -164,9 +170,76 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnGuardarDrive.disabled = false;
       btnGuardarDrive.innerHTML = `
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-        Guardar en Base de Datos (InsForge)
+        💾 Guardar Certificado
       `;
+
+      // Mostrar el Código QR en pantalla grande automáticamente para escanear
+      abrirModalQRDirecto();
     });
+
+    // Botón para mostrar el QR en pantalla grande a demanda
+    const btnMostrarQRModal = document.getElementById('btnMostrarQRModal');
+    if (btnMostrarQRModal) {
+      btnMostrarQRModal.addEventListener('click', () => {
+        syncStateFromForm();
+        abrirModalQRDirecto();
+      });
+    }
+
+    function abrirModalQRDirecto() {
+      const modal = document.getElementById('modalQRDirecto');
+      const qrContainer = document.getElementById('modalQRLargeContainer');
+      const txtNombre = document.getElementById('modalQREstudiante');
+      const txtDni = document.getElementById('modalQRDni');
+      const txtCod = document.getElementById('modalQRCodigo');
+      const linkDirecto = document.getElementById('btnAbrirValidacionDirecta');
+
+      if (!modal) return;
+
+      const config = window.CONFIG || {};
+      const baseUrl = config.appBaseUrl || window.location.origin;
+      const urlValidacion = `${baseUrl}/validar.html?id=${encodeURIComponent(state.idCertificado)}`;
+
+      if (txtNombre) txtNombre.textContent = state.nombreApellido || 'Estudiante';
+      if (txtDni) txtDni.textContent = state.dni || 'Sin DNI';
+      if (txtCod) txtCod.textContent = state.idCertificado;
+      if (linkDirecto) linkDirecto.href = urlValidacion;
+
+      if (qrContainer) {
+        qrContainer.innerHTML = '';
+        if (window.QRCode) {
+          new QRCode(qrContainer, {
+            text: urlValidacion,
+            width: 200,
+            height: 200,
+            colorDark: "#000f9f",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        } else {
+          const img = document.createElement('img');
+          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(urlValidacion)}`;
+          img.style.width = '200px';
+          img.style.height = '200px';
+          qrContainer.appendChild(img);
+        }
+      }
+
+      modal.classList.add('active');
+    }
+
+    const btnCloseModalQRDirecto = document.getElementById('btnCloseModalQRDirecto');
+    const btnCerrarModalQRAceptar = document.getElementById('btnCerrarModalQRAceptar');
+    if (btnCloseModalQRDirecto) {
+      btnCloseModalQRDirecto.addEventListener('click', () => {
+        document.getElementById('modalQRDirecto')?.classList.remove('active');
+      });
+    }
+    if (btnCerrarModalQRAceptar) {
+      btnCerrarModalQRAceptar.addEventListener('click', () => {
+        document.getElementById('modalQRDirecto')?.classList.remove('active');
+      });
+    }
 
     // Enviar Certificado Digital por WhatsApp
     const btnEnviarWhatsapp = document.getElementById('btnEnviarWhatsapp');

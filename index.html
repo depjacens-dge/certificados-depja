@@ -182,20 +182,21 @@
         </div>
 
         <!-- Botones de Acción -->
+        <!-- Botones de Acción de la Escuela -->
         <div class="action-buttons">
-          <button type="button" id="btnImportarExcel" class="btn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3);">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            📊 Subir Planilla Excel de Alumnos
+          <button type="button" id="btnGuardarDrive" class="btn btn-success" style="font-weight: 700; font-size: 0.95rem; padding: 0.75rem 1rem; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            💾 Guardar Certificado
+          </button>
+
+          <button type="button" id="btnMostrarQRModal" class="btn" style="background: linear-gradient(135deg, #000f9f 0%, #002280 100%); color: #ffffff; font-weight: 700;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            📱 Mostrar Código QR para Escanear
           </button>
 
           <button type="button" id="btnImprimir" class="btn btn-primary">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-4 0h-4v-4h4v4z"></path></svg>
-            Imprimir / Descargar PDF (A4)
-          </button>
-
-          <button type="button" id="btnGuardarDrive" class="btn btn-success">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-            Guardar en Base de Datos (InsForge)
+            🖨️ Imprimir / Descargar PDF (A4)
           </button>
 
           <!-- Envío Digital Directo por WhatsApp (100% Gratis) -->
@@ -532,6 +533,42 @@
           • <strong>CENS 3-419:</strong> <code>cens3419</code> (clave: <code>cens3419</code>)<br>
           • <strong>CENS 3-415:</strong> <code>cens3415</code> (clave: <code>cens3415</code>)
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CÓDIGO QR EN PANTALLA GIGANTE PARA EL ALUMNO -->
+  <div class="modal-overlay" id="modalQRDirecto">
+    <div class="modal-card" style="max-width: 480px; text-align: center; border-radius: 16px; padding: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div style="font-weight: 800; color: #000f9f; font-size: 1.1rem; text-transform: uppercase;">
+          📱 Certificado Digital Oficial
+        </div>
+        <button type="button" class="btn-icon" id="btnCloseModalQRDirecto">✕</button>
+      </div>
+
+      <p style="font-size: 0.9rem; color: #475569; margin-bottom: 1.25rem;">
+        Apunta la cámara de tu celular para validar y llevar tu certificado digital:
+      </p>
+
+      <!-- Contenedor del QR Grande -->
+      <div style="display: inline-block; padding: 1.25rem; background: #ffffff; border: 2px solid #000f9f; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 15, 159, 0.15); margin-bottom: 1.25rem;" id="modalQRLargeContainer">
+        <!-- Generado por QR.js -->
+      </div>
+
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; font-size: 0.85rem; color: #1e293b; margin-bottom: 1.25rem;">
+        <div><strong>Estudiante:</strong> <span id="modalQREstudiante">-</span></div>
+        <div><strong>DNI:</strong> <span id="modalQRDni">-</span></div>
+        <div><strong>Ticket / Código:</strong> <span id="modalQRCodigo" style="font-family: monospace; font-weight: 700; color: #000f9f;">-</span></div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: center;">
+        <a id="btnAbrirValidacionDirecta" href="#" target="_blank" class="btn btn-outline" style="font-size: 0.85rem; text-decoration: none;">
+          🔗 Abrir en Navegador ↗
+        </a>
+        <button type="button" class="btn btn-primary" id="btnCerrarModalQRAceptar">
+          Aceptar
+        </button>
       </div>
     </div>
   </div>
