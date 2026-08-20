@@ -944,9 +944,14 @@
             <td>${esc.localidad || 'N/A'}</td>
             <td><span style="background: #dcfce7; color: #15803d; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">Activa</span></td>
             <td>
-              <button type="button" class="btn btn-outline btn-editar-escuela" data-id="${esc.id}" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
-                ✏️ Editar
-              </button>
+              <div style="display: flex; gap: 0.35rem;">
+                <button type="button" class="btn btn-outline btn-editar-escuela" data-id="${esc.id}" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" title="Editar Escuela">
+                  ✏️ Editar
+                </button>
+                <button type="button" class="btn btn-outline btn-eliminar-escuela" data-id="${esc.id}" data-nombre="${esc.nombre}" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: #ef4444; border-color: #fecaca;" title="Eliminar Escuela">
+                  🗑️
+                </button>
+              </div>
             </td>
           `;
           tbody.appendChild(tr);
@@ -966,6 +971,24 @@
               document.getElementById('inputEscuelaEmail').value = esc.email_contacto || '';
               document.getElementById('modalEscuelaTitle').textContent = '✏️ Editar Escuela ' + esc.numero;
               if (modalEscuela) modalEscuela.classList.add('active');
+            }
+          });
+        });
+
+        tbody.querySelectorAll('.btn-eliminar-escuela').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            const nombre = e.currentTarget.getAttribute('data-nombre');
+            const confirmacion = confirm(`¿Está seguro de que desea ELIMINAR permanentemente la institución "${nombre}"?\n\nEsta acción eliminará la escuela de la base de datos.`);
+            if (confirmacion) {
+              try {
+                await auth.eliminarEscuela(id);
+                alert('Escuela eliminada exitosamente.');
+                await renderTablaEscuelas();
+                await renderMetricas();
+              } catch(err) {
+                alert('Error al eliminar escuela: ' + err.message);
+              }
             }
           });
         });
@@ -1002,8 +1025,31 @@
             <td>${esc ? `${esc.numero} (${esc.nombre})` : 'Todas (Global)'}</td>
             <td>${u.email || '-'}</td>
             <td><span style="background: #dcfce7; color: #15803d; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">Activo</span></td>
+            <td>
+              <button type="button" class="btn btn-outline btn-eliminar-usuario" data-id="${u.id}" data-user="${u.usuario}" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: #ef4444; border-color: #fecaca;" title="Eliminar Usuario">
+                🗑️
+              </button>
+            </td>
           `;
           tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll('.btn-eliminar-usuario').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            const user = e.currentTarget.getAttribute('data-user');
+            const confirmacion = confirm(`¿Está seguro de que desea eliminar la cuenta de usuario "${user}"?`);
+            if (confirmacion) {
+              try {
+                await auth.eliminarUsuario(id);
+                alert('Usuario eliminado.');
+                await renderTablaUsuarios();
+                await renderMetricas();
+              } catch(err) {
+                alert('Error al eliminar usuario: ' + err.message);
+              }
+            }
+          });
         });
       }
 
@@ -1023,7 +1069,13 @@
         const tbody = document.getElementById('tbodyHistorialGlobal');
         if (!tbody) return;
         tbody.innerHTML = '';
-        certificados.slice(0, 50).forEach(c => {
+        
+        if (certificados.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">No hay certificados emitidos registrados.</td></tr>`;
+          return;
+        }
+
+        certificados.slice(0, 100).forEach(c => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${c.idCertificado}</strong></td>
@@ -1031,8 +1083,39 @@
             <td>${c.dni}</td>
             <td>${c.escuelaOrigen || 'N/A'}</td>
             <td>${c.fechaEmision || ''}</td>
+            <td>
+              <div style="display: flex; gap: 0.35rem;">
+                <a href="validar.html?id=${encodeURIComponent(c.idCertificado)}" target="_blank" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; text-decoration: none; color: #0284c7; border-color: #bae6fd;" title="Ver QR de Validación">
+                  🔍 QR
+                </a>
+                <button type="button" class="btn btn-outline btn-admin-del-cert" data-id="${c.idCertificado}" data-nombre="${c.nombreApellido}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: #ef4444; border-color: #fecaca;" title="Eliminar Certificado de la Base de Datos">
+                  🗑️
+                </button>
+              </div>
+            </td>
           `;
           tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll('.btn-admin-del-cert').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            const nombre = e.currentTarget.getAttribute('data-nombre');
+            const confirmacion = confirm(`¿Está seguro de que desea ELIMINAR permanentemente el certificado "${id}" del alumno "${nombre}" de la base de datos?\n\nEsta acción no se puede deshacer.`);
+            if (confirmacion) {
+              btn.disabled = true;
+              btn.textContent = '⌛';
+              const res = await window.databaseAPI.eliminarCertificadoEnInsforge(id);
+              if (res.exito) {
+                alert(`Certificado ${id} eliminado exitosamente.`);
+                await renderMetricas();
+              } else {
+                alert('Error al eliminar certificado: ' + res.mensaje);
+                btn.disabled = false;
+                btn.textContent = '🗑️';
+              }
+            }
+          });
         });
       }
 

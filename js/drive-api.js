@@ -149,6 +149,41 @@ class DatabaseAPI {
     return { exito: false, mensaje: 'No se pudo actualizar en la base de datos.' };
   }
 
+  // Eliminar un certificado de InsForge Cloud y de LocalStorage
+  async eliminarCertificadoEnInsforge(idCertificado) {
+    const config = window.CONFIG || {};
+    let eliminadoCloud = false;
+
+    // 1. Eliminar de InsForge Cloud
+    if (config.insforge && config.insforge.baseUrl && config.insforge.anonKey) {
+      try {
+        const tabla = config.insforge.tabla || 'certificados';
+        const url = `${config.insforge.baseUrl}/api/database/records/${tabla}?id_certificado=eq.${encodeURIComponent(idCertificado)}`;
+        
+        const res = await fetch(url, {
+          method: 'DELETE',
+          headers: this.getInsforgeHeaders()
+        });
+
+        if (res.ok || res.status === 204) {
+          eliminadoCloud = true;
+        }
+      } catch (err) {
+        console.warn('Error al eliminar en InsForge:', err);
+      }
+    }
+
+    // 2. Eliminar de LocalStorage
+    const lista = this.obtenerLocales().filter(c => c.idCertificado !== idCertificado);
+    localStorage.setItem(this.storageKey, JSON.stringify(lista));
+
+    return {
+      exito: true,
+      eliminadoCloud,
+      mensaje: 'Certificado eliminado correctamente de la base de datos.'
+    };
+  }
+
   // Buscar certificado por ID de Certificado o por DNI (Búsqueda instantánea en InsForge)
   async buscarCertificado(idO_Dni) {
     const config = window.CONFIG || {};

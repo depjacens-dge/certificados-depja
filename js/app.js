@@ -550,9 +550,17 @@ document.addEventListener('DOMContentLoaded', async () => {
           <td>${c.dni}</td>
           <td>${c.fechaEmision || ''}</td>
           <td>
-            <button class="btn btn-outline btn-cargar-cert" data-id="${c.idCertificado}" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
-              Cargar
-            </button>
+            <div style="display: flex; gap: 0.35rem;">
+              <button class="btn btn-outline btn-cargar-cert" data-id="${c.idCertificado}" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;" title="Cargar y Editar">
+                ✏️ Editar
+              </button>
+              <a href="validar.html?id=${encodeURIComponent(c.idCertificado)}" target="_blank" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; text-decoration: none; color: #0284c7; border-color: #bae6fd;" title="Ver QR">
+                🔍 QR
+              </a>
+              <button class="btn btn-outline btn-eliminar-cert" data-id="${c.idCertificado}" data-nombre="${c.nombreApellido}" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; color: #ef4444; border-color: #fecaca;" title="Eliminar de la Base de Datos">
+                🗑️
+              </button>
+            </div>
           </td>
         `;
         tbody.appendChild(tr);
@@ -567,7 +575,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             initFormValues();
             renderPreview();
             cerrarModalHistorial();
-            mostrarToast(`Certificado ${id} cargado en el editor.`);
+            mostrarToast(`Certificado ${id} cargado para edición.`);
+          }
+        });
+      });
+
+      tbody.querySelectorAll('.btn-eliminar-cert').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.target.getAttribute('data-id');
+          const nombre = e.target.getAttribute('data-nombre');
+          const confirmacion = confirm(`¿Está seguro de que desea ELIMINAR permanentemente el certificado "${id}" del alumno "${nombre}" de la base de datos?\n\nEsta acción no se puede deshacer.`);
+          if (confirmacion) {
+            btn.disabled = true;
+            btn.textContent = '⌛';
+            const res = await window.databaseAPI.eliminarCertificadoEnInsforge(id);
+            if (res.exito) {
+              mostrarToast(`Certificado ${id} eliminado de la base de datos.`);
+              await abrirModalHistorial();
+            } else {
+              alert('Error al eliminar: ' + res.mensaje);
+              btn.disabled = false;
+              btn.textContent = '🗑️';
+            }
           }
         });
       });

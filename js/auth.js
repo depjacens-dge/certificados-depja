@@ -280,6 +280,35 @@ class AuthManager {
     }
     return [];
   }
+
+  async eliminarEscuela(escuelaId) {
+    if (!this.esAdmin()) throw new Error('Acceso no autorizado.');
+    const config = window.CONFIG || {};
+    const url = `${config.insforge.baseUrl}/api/database/records/escuelas?id=eq.${encodeURIComponent(escuelaId)}`;
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: this.getHeaders()
+    });
+    if (res.ok || res.status === 204) {
+      await this.cargarEscuelas();
+      return { exito: true, mensaje: 'Escuela eliminada exitosamente.' };
+    }
+    throw new Error('No se pudo eliminar la escuela de la base de datos.');
+  }
+
+  async eliminarUsuario(userId) {
+    if (!this.esAdmin()) throw new Error('Acceso no autorizado.');
+    const config = window.CONFIG || {};
+    const url = `${config.insforge.baseUrl}/api/database/records/usuarios_roles?id=eq.${encodeURIComponent(userId)}`;
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: this.getHeaders()
+    });
+    if (res.ok || res.status === 204) {
+      return { exito: true, mensaje: 'Usuario eliminado exitosamente.' };
+    }
+    throw new Error('No se pudo eliminar el usuario de la base de datos.');
+  }
 }
 
 window.authManager = new AuthManager();
