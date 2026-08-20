@@ -345,30 +345,35 @@ body {
 .cert-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 1.8rem;
+  padding-bottom: 0.5rem;
 }
 
 .cert-header-dept {
-  font-size: 11pt;
+  font-size: 11.5pt;
   font-weight: 700;
   color: var(--dge-blue);
-  line-height: 1.25;
-  width: 65%;
+  line-height: 1.35;
+  width: 58%;
   text-transform: uppercase;
+  letter-spacing: 0.2px;
 }
 
 .cert-logo-dge {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  width: 40%;
 }
 
 .cert-logo-img {
-  height: 14mm;
-  max-height: 52px;
+  height: 22mm;
+  max-height: 80px;
   width: auto;
+  max-width: 100%;
   object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.05));
 }
 
 /* Título Principal */
