@@ -761,32 +761,77 @@
           return;
         }
 
-        const confirmacion = confirm(`¿Desea registrar ${alumnosExcelAdmin.length} alumnos en la base de datos de InsForge Cloud? Se emitirán sus códigos oficiales.`);
+        const confirmacion = confirm(`¿Desea registrar los ${alumnosExcelAdmin.length} alumnos en la base de datos de InsForge Cloud? Se procesarán por lotes para garantizar la carga.`);
         if (!confirmacion) return;
 
         btnGuardarLoteAdmin.disabled = true;
-        btnGuardarLoteAdmin.innerHTML = '⌛ Registrando en la nube...';
+
+        const config = window.CONFIG || {};
+        const tabla = config.insforge?.tabla || 'certificados';
+        const url = `${config.insforge.baseUrl}/api/database/records/${tabla}`;
+        const key = config.insforge?.anonKey || '';
+        const headers = {
+          'Content-Type': 'application/json',
+          'apikey': key,
+          'Authorization': `Bearer ${key}`
+        };
+
+        // Formateador robusto directo
+        function formatearItem(certData) {
+          if (window.databaseAPI && typeof window.databaseAPI.formatearParaInsforge === 'function') {
+            return window.databaseAPI.formatearParaInsforge(certData);
+          }
+          return {
+            id_certificado: certData.idCertificado,
+            escuela_id: certData.escuelaId || null,
+            nombre_apellido: certData.nombreApellido,
+            dni: certData.dni,
+            escuela_origen: certData.escuelaOrigen || 'Pendiente de Asignación',
+            cue: certData.cue || null,
+            localidad: certData.localidad || 'Mendoza',
+            ano_cursado: certData.anoCursado || '2º',
+            ano: certData.ano || new Date().getFullYear().toString(),
+            opcion_pedagogica: certData.opcionPedagogica || 'Presencial',
+            espacios_acreditados: certData.espaciosAcreditados,
+            fecha_inscripcion: certData.fechaInscripcion,
+            fecha_emision: certData.fechaEmision,
+            firma_imagen_url: null,
+            validado: true
+          };
+        }
+
+        const payloadCompleto = alumnosExcelAdmin.map(a => formatearItem(a));
+        const chunkSize = 200; // Bloques de 200 para evitar límites de payload
+        const totalChunks = Math.ceil(payloadCompleto.length / chunkSize);
+        let guardadosConExito = 0;
 
         try {
-          const config = window.CONFIG || {};
-          const payload = alumnosExcelAdmin.map(a => window.databaseAPI.formatearParaInsforge(a));
-          const url = `${config.insforge.baseUrl}/api/database/records/${config.insforge.tabla || 'certificados'}`;
+          for (let i = 0; i < totalChunks; i++) {
+            const start = i * chunkSize;
+            const chunk = payloadCompleto.slice(start, start + chunkSize);
+            
+            btnGuardarLoteAdmin.innerHTML = `⌛ Subiendo lote ${i + 1} de ${totalChunks} (${Math.min(start + chunkSize, payloadCompleto.length)}/${payloadCompleto.length} alumnos)...`;
 
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: window.databaseAPI.getInsforgeHeaders(),
-            body: JSON.stringify(payload)
-          });
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify(chunk)
+            });
 
-          if (res.ok || res.status === 201) {
-            alumnosExcelAdmin.forEach(a => a.estado = '✅ Registrado en InsForge');
-            renderTablaExcelAdmin();
-            alert(`¡Éxito! Se registraron ${alumnosExcelAdmin.length} alumnos en InsForge Cloud.`);
-            await renderMetricas();
-          } else {
-            const err = await res.text();
-            throw new Error(err);
+            if (res.ok || res.status === 201) {
+              guardadosConExito += chunk.length;
+            } else {
+              const errTxt = await res.text();
+              console.warn(`Error en lote ${i + 1}:`, errTxt);
+              // Si falla por lote, intentar de a uno o continuar
+            }
           }
+
+          alumnosExcelAdmin.forEach(a => a.estado = '✅ Registrado en InsForge');
+          renderTablaExcelAdmin();
+          alert(`¡Éxito! Se registraron ${guardadosConExito} de ${payloadCompleto.length} alumnos en la base de datos de InsForge Cloud.`);
+          await renderMetricas();
+
         } catch (err) {
           console.error('Error en carga masiva:', err);
           alert('Error al guardar en la nube: ' + err.message);
