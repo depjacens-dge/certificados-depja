@@ -166,23 +166,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const res = await window.databaseAPI.guardarCertificado(state);
       
-      mostrarToast(res.mensaje);
+      mostrarToast(`✅ Certificado guardado exitosamente.`);
       btnGuardarDrive.disabled = false;
       btnGuardarDrive.innerHTML = `
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-        💾 Guardar
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        ✅ Guardado exitosamente
       `;
+
+      // Volver a "💾 Guardar" después de 3.5 segundos
+      setTimeout(() => {
+        if (btnGuardarDrive) {
+          btnGuardarDrive.innerHTML = `
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            💾 Guardar
+          `;
+        }
+      }, 3500);
 
       // Mostrar el Código QR en pantalla grande automáticamente para escanear
       abrirModalQRDirecto();
     });
 
+    // Función Global para abrir el modal del QR desde cualquier botón o evento
+    window.abrirModalQRDirectoGlobal = function() {
+      syncStateFromForm();
+      abrirModalQRDirecto();
+    };
+
     // Botón para mostrar el QR en pantalla grande a demanda
     const btnMostrarQRModal = document.getElementById('btnMostrarQRModal');
     if (btnMostrarQRModal) {
       btnMostrarQRModal.addEventListener('click', () => {
-        syncStateFromForm();
-        abrirModalQRDirecto();
+        window.abrirModalQRDirectoGlobal();
       });
     }
 
