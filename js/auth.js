@@ -236,7 +236,9 @@ class AuthManager {
       await this.cargarEscuelas();
       return { exito: true, mensaje: 'Escuela guardada exitosamente.' };
     }
-    throw new Error('Error al guardar la escuela en la base de datos.');
+    const errJson = await res.json().catch(() => null);
+    const msg = errJson ? (errJson.message || errJson.error || JSON.stringify(errJson)) : `Error ${res.status}`;
+    throw new Error(msg);
   }
 
   async guardarUsuario(userData) {
