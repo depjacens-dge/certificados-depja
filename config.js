@@ -31,10 +31,15 @@ const CONFIG = {
   },
 
   // ==========================================
-  // 3. RESPALDO OPCIONAL (GOOGLE DRIVE / SHEETS)
+  // 3. CONSULTA SEGURA DE PADRÓN EN GOOGLE DRIVE (APPS SCRIPT)
   // ==========================================
-  // URL opcional de WebApp desplegada en Google Apps Script
-  googleAppsScriptUrl: '', 
+  padronDrive: {
+    token: 'DEPJA_MENDOZA_PADRON_2026',
+    urls: [
+      'https://script.google.com/macros/s/AKfycbzYz4_XzvJhM5tQZPZgGEWQwSekKUkPTIj55SO7M9u4vKCo8W3mmfACxMgAQG2i8rmDmQ/exec',
+      'https://script.google.com/macros/s/AKfycbxeH5bRtZJKkwww2PBpdIK8ykyh6Z6DJedbwXLVF-SwI8C8RxDHz8wYA8c9dWyx4IaYMA/exec'
+    ]
+  }, 
 
   // ==========================================
   // 4. DOMINIO WEB ALOJADO (GITHUB PAGES / VERCEL / SERVIDOR PROPIO)

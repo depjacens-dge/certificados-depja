@@ -195,18 +195,49 @@ class DatabaseAPI {
       }
     }
 
-    // 2. Intentar buscar en Google Drive si está configurado
-    if (config.googleAppsScriptUrl && config.googleAppsScriptUrl.trim() !== '') {
-      try {
-        const url = `${config.googleAppsScriptUrl}?id=${encodeURIComponent(busqueda)}&dni=${encodeURIComponent(busqueda)}`;
-        const response = await fetch(url);
-        const resData = await response.json();
-        
-        if (resData.status === 'success' && resData.found) {
-          return { encontrado: true, fuente: 'Google Drive / Sheets', data: resData.data };
+    // 2. Consultar Padrón Privado en Google Drive (Apps Script Multi-Planilla)
+    const padronDrive = config.padronDrive || {};
+    const driveUrls = padronDrive.urls || [];
+    const token = padronDrive.token || 'DEPJA_MENDOZA_PADRON_2026';
+    const dniLimpio = busqueda.replace(/\D/g, '');
+
+    if (dniLimpio && driveUrls.length > 0) {
+      for (let i = 0; i < driveUrls.length; i++) {
+        const baseUrl = driveUrls[i];
+        if (!baseUrl) continue;
+        try {
+          const fetchUrl = `${baseUrl}?token=${encodeURIComponent(token)}&dni=${encodeURIComponent(dniLimpio)}`;
+          const response = await fetch(fetchUrl);
+          const resData = await response.json();
+
+          if (resData && resData.encontrado) {
+            // Adaptar campos al formato de la aplicación
+            const alumnoData = {
+              idCertificado: `CERT-DEPJA-${Math.floor(100000 + Math.random() * 900000)}`,
+              nombreApellido: resData.nombreApellido || '',
+              dni: resData.dni || busqueda,
+              escuelaOrigen: resData.escuelaOrigen || 'Pendiente de Asignación',
+              cue: resData.cue || '',
+              localidad: resData.localidad || 'Mendoza',
+              anoCursado: resData.anoCursado || '2º',
+              ano: resData.ano || new Date().getFullYear().toString(),
+              opcionPedagogica: resData.opcionPedagogica || 'Presencial',
+              espaciosAcreditados: resData.espaciosAcreditados || 'Lengua y Literatura I (Aprobado); Matemática I (Aprobado)',
+              fechaInscripcion: resData.fechaInscripcion || new Date().toLocaleDateString('es-AR'),
+              fechaEmision: new Date().toLocaleDateString('es-AR'),
+              esPadronDrive: true,
+              origenPlanilla: `Google Drive (Planilla ${i + 1})`
+            };
+
+            return {
+              encontrado: true,
+              fuente: `Google Drive - Padrón General (Planilla ${i + 1})`,
+              data: alumnoData
+            };
+          }
+        } catch (err) {
+          console.warn(`Error consultando Apps Script Planilla ${i + 1}:`, err);
         }
-      } catch (err) {
-        console.warn('Google Drive no disponible en este momento:', err);
       }
     }
 
@@ -221,7 +252,7 @@ class DatabaseAPI {
       return { encontrado: true, fuente: 'Almacenamiento Local (Caché)', data: encontrado };
     }
 
-    return { encontrado: false, mensaje: 'Certificado no encontrado en los registros oficiales.' };
+    return { encontrado: false, mensaje: 'Estudiante no encontrado en el Padrón General ni en certificados emitidos.' };
   }
 
   // Obtener lista completa de certificados (desde InsForge o Local) con soporte de filtros por Escuela
