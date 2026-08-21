@@ -674,18 +674,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.QRCode) {
       new QRCode(qrContainer, {
         text: urlValidacion,
-        width: 126,
-        height: 126,
+        width: 155,
+        height: 155,
         colorDark: "#000000",
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.H
       });
     } else {
       const qrImg = document.createElement('img');
-      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=126x126&data=${encodeURIComponent(urlValidacion)}`;
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=155x155&data=${encodeURIComponent(urlValidacion)}`;
       qrImg.alt = "Código QR de Verificación";
-      qrImg.style.width = "126px";
-      qrImg.style.height = "126px";
+      qrImg.style.width = "155px";
+      qrImg.style.height = "155px";
       qrContainer.appendChild(qrImg);
     }
   }
