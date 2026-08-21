@@ -712,6 +712,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           <td>${c.fechaEmision || ''}</td>
           <td>
             <div style="display: flex; gap: 0.35rem;">
+              <button class="btn btn-outline btn-pdf-cert" data-id="${c.idCertificado}" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; color: #000f9f; border-color: #bfdbfe; font-weight: 700;" title="Descargar / Imprimir Certificado en PDF">
+                📄 PDF
+              </button>
               <button class="btn btn-outline btn-cargar-cert" data-id="${c.idCertificado}" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;" title="Cargar y Editar">
                 ✏️ Editar
               </button>
@@ -727,9 +730,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         tbody.appendChild(tr);
       });
 
+      tbody.querySelectorAll('.btn-pdf-cert').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          const item = lista.find(x => x.idCertificado === id);
+          if (item) {
+            Object.assign(state, item);
+            initFormValues();
+            renderPreview();
+            cerrarModalHistorial();
+            setTimeout(() => {
+              window.print();
+            }, 250);
+          }
+        });
+      });
+
       tbody.querySelectorAll('.btn-cargar-cert').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const id = e.target.getAttribute('data-id');
+          const id = e.currentTarget.getAttribute('data-id');
           const item = lista.find(x => x.idCertificado === id);
           if (item) {
             Object.assign(state, item);
