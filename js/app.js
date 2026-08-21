@@ -631,6 +631,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (boxTemEl) {
       boxTemEl.textContent = (state.opcionPedagogica && state.opcionPedagogica.toUpperCase() === 'TEM') ? '✓' : '';
     }
+    const boxCepasEl = document.getElementById('boxCepas');
+    if (boxCepasEl) {
+      boxCepasEl.textContent = (state.opcionPedagogica && state.opcionPedagogica.toUpperCase() === 'CEPAS') ? '✓' : '';
+    }
 
     // Render Espacios Acreditados
     const containerEspacios = document.getElementById('viewEspaciosLines');
