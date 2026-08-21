@@ -19,7 +19,7 @@ const CONFIG = {
   // Cambia este correo por el de la persona a la que le prestarás el servicio
   correoResponsable: 'admin.depja@educacion.gob.ar', 
   nombreInstitucion: 'DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS',
-  subtituloConvenio: 'CONVENIO SEGURIDAD PRIVADA - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS',
+  subtituloConvenio: 'CONVENIOS SINDICATOS Y/O EMPRESAS - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS',
 
   // ==========================================
   // 2. BASE DE DATOS EN LA NUBE (INSFORGE POSTGRESQL)

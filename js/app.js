@@ -627,8 +627,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const viewSubtituloEl = document.getElementById('viewSubtituloConvenio');
     if (viewSubtituloEl) {
-      const convText = (state.convenio || 'SEGURIDAD PRIVADA').trim().toUpperCase();
-      viewSubtituloEl.textContent = `CONVENIO ${convText} - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS`;
+      viewSubtituloEl.textContent = 'CONVENIOS SINDICATOS Y/O EMPRESAS - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS';
     }
 
     document.getElementById('viewAnoCursadoTexto').textContent = state.anoCursado ? `${state.anoCursado} Año` : '';
