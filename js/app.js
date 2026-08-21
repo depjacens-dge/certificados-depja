@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     escuelaOrigen: 'C.E.N.S. Nº 3-415',
     ano: '2024',
     cue: '5000452-00',
+    convenio: 'Seguridad Privada',
     opcionPedagogica: 'Presencial',
     espaciosAcreditados: [
       'Lengua y Literatura I (Aprobado)',
@@ -70,6 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('inputEscuela').value = state.escuelaOrigen;
     document.getElementById('inputCue').value = state.cue;
     document.getElementById('inputAno').value = state.ano;
+    const inputConvenioEl = document.getElementById('inputConvenio');
+    if (inputConvenioEl) inputConvenioEl.value = state.convenio || 'Seguridad Privada';
     document.getElementById('inputFechaInscripcion').value = state.fechaInscripcion;
     document.getElementById('inputFechaEmision').value = state.fechaEmision;
 
@@ -593,6 +596,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     state.cue = document.getElementById('inputCue').value;
     state.ano = document.getElementById('inputAno').value;
 
+    const inputConvenioEl = document.getElementById('inputConvenio');
+    if (inputConvenioEl) state.convenio = inputConvenioEl.value;
+
     const fechaIns = document.getElementById('inputFechaInscripcion').value;
     if (fechaIns) {
       const parts = fechaIns.split('-');
@@ -615,6 +621,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('viewEscuela').textContent = state.escuelaOrigen || '';
     document.getElementById('viewCue').textContent = state.cue || '';
     document.getElementById('viewAno').textContent = state.ano || '';
+    
+    const viewConvenioEl = document.getElementById('viewConvenio');
+    if (viewConvenioEl) viewConvenioEl.textContent = state.convenio || '';
+
+    const viewSubtituloEl = document.getElementById('viewSubtituloConvenio');
+    if (viewSubtituloEl) {
+      const convText = (state.convenio || 'SEGURIDAD PRIVADA').trim().toUpperCase();
+      viewSubtituloEl.textContent = `CONVENIO ${convText} - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS`;
+    }
+
     document.getElementById('viewAnoCursadoTexto').textContent = state.anoCursado ? `${state.anoCursado} Año` : '';
     document.getElementById('viewFechaInscripcion').textContent = state.fechaInscripcion || '00/00/0000';
     document.getElementById('viewFechaEmision').textContent = state.fechaEmision || '……./……../……….';
@@ -821,6 +837,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     state.anoCursado = alumno.anoCursado || '2º';
     state.ano = alumno.ano || new Date().getFullYear().toString();
     state.opcionPedagogica = alumno.opcionPedagogica || 'Presencial';
+    state.convenio = alumno.convenio || 'Seguridad Privada';
     state.espaciosAcreditados = Array.isArray(alumno.espaciosAcreditados) ? [...alumno.espaciosAcreditados] : [alumno.espaciosAcreditados];
     state.fechaInscripcion = alumno.fechaInscripcion || obtenerFechaHoyTexto();
     state.fechaEmision = alumno.fechaEmision || obtenerFechaHoyTexto();

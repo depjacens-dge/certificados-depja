@@ -79,6 +79,7 @@ async function ejecutarVerificacion(codigoODni) {
             <div><strong>Localidad:</strong> ${d.localidad || 'Mendoza'}</div>
             <div><strong>Año de Cursado:</strong> ${d.anoCursado ? `${d.anoCursado} Año` : '2º Año'}</div>
             <div><strong>Opción Pedagógica / Programa:</strong> ${d.opcionPedagogica || 'TEM'}</div>
+            <div><strong>Convenio:</strong> ${d.convenio || 'Seguridad Privada'}</div>
             <div><strong>Fecha de Emisión:</strong> ${d.fechaEmision || '-'}</div>
             <div><strong>Fecha de Inscripción:</strong> ${d.fechaInscripcion || '-'}</div>
           </div>

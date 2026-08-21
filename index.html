@@ -116,6 +116,12 @@
           </div>
         </div>
 
+        <!-- Tipo de Convenio -->
+        <div class="form-group">
+          <label for="inputConvenio">Tipo de Convenio *</label>
+          <input type="text" id="inputConvenio" class="form-control" placeholder="Ej: Seguridad Privada" value="Seguridad Privada">
+        </div>
+
         <!-- Selector de Año de Cursado (1º, 2º, 3º) -->
         <div class="form-group">
           <label>Año de Cursado *</label>
@@ -249,7 +255,7 @@
 
         <!-- Título Principal & Subtítulo -->
         <h1 class="cert-main-title">CERTIFICADO DE ESTUDIOS INCOMPLETOS SECUNDARIOS</h1>
-        <div class="cert-main-subtitle">CONVENIO SEGURIDAD PRIVADA - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS</div>
+        <div class="cert-main-subtitle" id="viewSubtituloConvenio">CONVENIO SEGURIDAD PRIVADA - DIRECCIÓN DE EDUCACIÓN PERMANENTE DE JÓVENES Y ADULTOS</div>
 
         <!-- Banner 1: DATOS DEL ESTUDIANTE -->
         <div class="cert-banner-header">DATOS DEL ESTUDIANTE</div>
@@ -295,9 +301,14 @@
             </div>
           </div>
 
-          <div class="cert-line-group" style="grid-column: span 2;">
+          <div class="cert-line-group">
             <span class="cert-line-label">CUE:</span>
             <div class="cert-line-fill" id="viewCue"></div>
+          </div>
+
+          <div class="cert-line-group">
+            <span class="cert-line-label">Convenio:</span>
+            <div class="cert-line-fill" id="viewConvenio"></div>
           </div>
         </div>
 

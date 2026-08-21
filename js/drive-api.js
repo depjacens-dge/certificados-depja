@@ -35,6 +35,7 @@ class DatabaseAPI {
       ano_cursado: certData.anoCursado || '',
       ano: certData.ano || '',
       opcion_pedagogica: certData.opcionPedagogica || '',
+      convenio: certData.convenio || 'Seguridad Privada',
       espacios_acreditados: certData.espaciosAcreditados || [],
       fecha_inscripcion: certData.fechaInscripcion || '',
       fecha_emision: certData.fechaEmision || '',
@@ -57,6 +58,7 @@ class DatabaseAPI {
       anoCursado: row.ano_cursado || '',
       ano: row.ano || '',
       opcionPedagogica: row.opcion_pedagogica || '',
+      convenio: row.convenio || 'Seguridad Privada',
       espaciosAcreditados: Array.isArray(row.espacios_acreditados) 
         ? row.espacios_acreditados 
         : (row.espacios_acreditados ? [row.espacios_acreditados] : []),
