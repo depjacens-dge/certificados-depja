@@ -332,7 +332,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 12mm 18mm 8mm 18mm;
+  padding: 10mm 18mm 10mm 18mm;
   margin: 0 auto;
   background-color: #ffffff;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -608,8 +608,10 @@ body {
 /* Footer Institucional Mendoza */
 .cert-footer-mendoza {
   margin-top: auto;
-  border-top: 1px solid rgba(200, 169, 119, 0.5);
-  padding-top: 1rem;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(200, 169, 119, 0.4);
+  padding-top: 0.6rem;
+  padding-bottom: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
